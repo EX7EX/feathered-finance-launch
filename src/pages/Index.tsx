@@ -3,10 +3,36 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { ArrowRight, ShieldCheck, Zap, Activity } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Index = () => {
+  const { user } = useAuth();
+
   return (
     <div className="min-h-screen flex flex-col">
+      <header className="sticky top-0 z-50 w-full border-b border-gray-800 bg-crypto-dark/80 backdrop-blur-lg">
+        <div className="container flex h-16 items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="h-8 w-8 rounded-full bg-crypto-gradient flex items-center justify-center">
+              <span className="font-bold text-white">FX</span>
+            </div>
+            <span className="font-bold text-xl text-white">FeatheredX</span>
+          </div>
+          
+          <div>
+            <Button 
+              asChild
+              variant="ghost" 
+              className="border border-gray-700 text-gray-200 hover:bg-gray-800"
+            >
+              <Link to={user ? "/dashboard" : "/auth"}>
+                {user ? "Dashboard" : "Sign In"}
+              </Link>
+            </Button>
+          </div>
+        </div>
+      </header>
+
       <div className="container mx-auto px-4 py-12 flex flex-col lg:flex-row items-center gap-12">
         <div className="flex-1 space-y-8">
           <div>
@@ -24,8 +50,8 @@ const Index = () => {
               size="lg" 
               className="bg-crypto-purple hover:bg-crypto-purple/90 text-white font-medium"
             >
-              <Link to="/dashboard">
-                Launch App <ArrowRight className="ml-2 h-4 w-4" />
+              <Link to={user ? "/dashboard" : "/auth"}>
+                {user ? "Dashboard" : "Launch App"} <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
             <Button 

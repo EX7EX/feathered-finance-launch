@@ -7,16 +7,32 @@ import {
   BellIcon, 
   UserIcon, 
   SearchIcon,
-  ChevronDownIcon
+  ChevronDownIcon,
+  LogOut
 } from "lucide-react";
 import WalletModal from "./WalletModal";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const Navbar = () => {
   const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
   const { toast } = useToast();
+  const { user, signOut } = useAuth();
   
   const handleConnectWallet = () => {
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to connect your wallet.",
+      });
+      return;
+    }
     setIsWalletModalOpen(true);
   };
   
@@ -25,6 +41,10 @@ const Navbar = () => {
       title: "Notifications",
       description: "No new notifications at this time.",
     });
+  };
+
+  const handleSignOut = async () => {
+    await signOut();
   };
 
   return (
@@ -65,15 +85,48 @@ const Navbar = () => {
             <BellIcon className="h-4 w-4" />
           </Button>
           
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="hidden md:flex items-center gap-1 border-gray-700 hover:bg-gray-800 text-gray-300"
-          >
-            <UserIcon className="h-4 w-4" />
-            <span>Account</span>
-            <ChevronDownIcon className="h-3 w-3 ml-1" />
-          </Button>
+          {user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="hidden md:flex items-center gap-1 border-gray-700 hover:bg-gray-800 text-gray-300"
+                >
+                  <UserIcon className="h-4 w-4" />
+                  <span>Account</span>
+                  <ChevronDownIcon className="h-3 w-3 ml-1" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56 bg-crypto-blue border-gray-800">
+                <DropdownMenuItem className="text-gray-300 focus:text-white focus:bg-crypto-purple/20">
+                  <Link to="/profile" className="flex w-full items-center">
+                    <UserIcon className="mr-2 h-4 w-4" />
+                    <span>Profile</span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  className="text-gray-300 focus:text-white focus:bg-crypto-purple/20"
+                  onClick={handleSignOut}
+                >
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Sign Out</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="hidden md:flex items-center gap-1 border-gray-700 hover:bg-gray-800 text-gray-300"
+              asChild
+            >
+              <Link to="/auth">
+                <UserIcon className="h-4 w-4 mr-1" />
+                Sign In
+              </Link>
+            </Button>
+          )}
           
           <Button 
             onClick={handleConnectWallet}

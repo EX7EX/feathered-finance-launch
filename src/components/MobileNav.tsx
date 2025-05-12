@@ -7,17 +7,25 @@ import {
   RocketIcon,
   GamepadIcon,
   MenuIcon,
+  LogOut,
+  UserIcon
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import WalletModal from "./WalletModal";
+import { useAuth } from "@/contexts/AuthContext";
 
 const MobileNav = () => {
   const location = useLocation();
   const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
+  const { user, signOut } = useAuth();
   
   const isActive = (path: string) => {
     return location.pathname === path;
+  };
+
+  const handleSignOut = async () => {
+    await signOut();
   };
 
   return (
@@ -32,13 +40,23 @@ const MobileNav = () => {
           </Link>
 
           <div className="flex items-center gap-2">
-            <Button 
-              onClick={() => setIsWalletModalOpen(true)}
-              size="sm"
-              className="bg-crypto-purple hover:bg-crypto-purple/90 text-white"
-            >
-              Connect
-            </Button>
+            {user ? (
+              <Button 
+                onClick={() => setIsWalletModalOpen(true)}
+                size="sm"
+                className="bg-crypto-purple hover:bg-crypto-purple/90 text-white"
+              >
+                Connect
+              </Button>
+            ) : (
+              <Button
+                size="sm"
+                className="bg-crypto-purple hover:bg-crypto-purple/90 text-white"
+                asChild
+              >
+                <Link to="/auth">Sign In</Link>
+              </Button>
+            )}
             
             <Sheet>
               <SheetTrigger asChild>
@@ -54,6 +72,20 @@ const MobileNav = () => {
                     </div>
                     <span className="font-bold text-xl text-white">FeatheredX</span>
                   </div>
+                  
+                  {user && (
+                    <div className="px-1 py-2 border-b border-gray-800">
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="h-10 w-10 rounded-full bg-crypto-purple/20 flex items-center justify-center">
+                          <UserIcon className="h-5 w-5 text-crypto-purple" />
+                        </div>
+                        <div>
+                          <div className="font-medium text-white">{user.email}</div>
+                          <div className="text-xs text-gray-400">Basic Account</div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                   
                   <nav className="flex flex-col gap-4">
                     <Link to="/dashboard" className="flex items-center gap-3 text-gray-300 hover:text-white transition-colors">
@@ -72,6 +104,16 @@ const MobileNav = () => {
                       <GamepadIcon className="h-5 w-5" />
                       <span className="font-medium">Game</span>
                     </Link>
+                    
+                    {user && (
+                      <button
+                        onClick={handleSignOut}
+                        className="flex items-center gap-3 text-gray-300 hover:text-white transition-colors mt-4"
+                      >
+                        <LogOut className="h-5 w-5" />
+                        <span className="font-medium">Sign Out</span>
+                      </button>
+                    )}
                   </nav>
                 </div>
               </SheetContent>

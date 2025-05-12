@@ -1,205 +1,326 @@
 
-import React from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { 
-  BarChartIcon, 
-  TrendingUpIcon, 
-  TrendingDownIcon, 
-  DollarSignIcon,
-  ArrowRightIcon,
-} from "lucide-react";
+import React, { useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
+import { useUserProfile } from "@/hooks/use-user-profile";
+import { useUserAssets } from "@/hooks/use-user-assets";
+
+const mockPriceData = [
+  { name: "Jan", BTC: 42000, ETH: 3200 },
+  { name: "Feb", BTC: 44000, ETH: 3000 },
+  { name: "Mar", BTC: 47000, ETH: 3300 },
+  { name: "Apr", BTC: 45000, ETH: 3100 },
+  { name: "May", BTC: 49000, ETH: 3500 },
+  { name: "Jun", BTC: 50000, ETH: 3400 },
+  { name: "Jul", BTC: 48000, ETH: 3200 },
+];
 
 const Dashboard = () => {
+  const [timeframe, setTimeframe] = useState("1W");
+  const { profile, isLoading: isLoadingProfile } = useUserProfile();
+  const { 
+    cryptoWallets, 
+    fiatAccounts, 
+    isLoading: isLoadingAssets,
+    totalPortfolioValueUsd 
+  } = useUserAssets();
+
+  const isLoading = isLoadingProfile || isLoadingAssets;
+
+  // Format number to currency
+  const formatCurrency = (value: number, symbol = "$", decimals = 2) => {
+    return `${symbol}${value.toLocaleString(undefined, {
+      minimumFractionDigits: decimals,
+      maximumFractionDigits: decimals,
+    })}`;
+  };
+
+  // Format crypto amount with appropriate precision
+  const formatCrypto = (value: number, symbol: string, decimals = 8) => {
+    return `${value.toLocaleString(undefined, {
+      minimumFractionDigits: decimals,
+      maximumFractionDigits: decimals,
+    })} ${symbol}`;
+  };
+
   return (
-    <div className="container mx-auto">
-      <div className="flex flex-col gap-6">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-            <p className="text-gray-400">Welcome back! Here's an overview of your portfolio.</p>
-          </div>
-          
-          <div className="flex gap-2">
-            <Button variant="outline" className="border-gray-700 hover:bg-gray-800">
-              Deposit
-            </Button>
-            <Button className="bg-crypto-purple hover:bg-crypto-purple/90">
-              Trade Now
-            </Button>
-          </div>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card className="bg-crypto-card border-gray-800">
-            <CardHeader className="pb-2">
-              <CardDescription>Total Balance</CardDescription>
-              <CardTitle className="text-2xl">$12,680.24</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center text-sm text-crypto-green">
-                <TrendingUpIcon className="h-4 w-4 mr-1" /> +5.23% today
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card className="bg-crypto-card border-gray-800">
-            <CardHeader className="pb-2">
-              <CardDescription>24h Trading Volume</CardDescription>
-              <CardTitle className="text-2xl">$3,452.87</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center text-sm text-crypto-red">
-                <TrendingDownIcon className="h-4 w-4 mr-1" /> -1.12% from yesterday
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card className="bg-crypto-card border-gray-800">
-            <CardHeader className="pb-2">
-              <CardDescription>Total Assets</CardDescription>
-              <CardTitle className="text-2xl">7</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Button variant="link" className="p-0 h-auto text-crypto-purple">
-                View all assets <ArrowRightIcon className="h-3 w-3 ml-1" />
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-        
-        <Card className="bg-crypto-card border-gray-800">
+    <div className="container mx-auto py-6 space-y-8">
+      <div className="flex flex-col md:flex-row gap-6">
+        <Card className="flex-1 border-gray-800 bg-crypto-blue/20 backdrop-blur-sm">
           <CardHeader>
-            <CardTitle className="flex items-center">
-              <BarChartIcon className="mr-2 h-5 w-5 text-crypto-purple" />
-              Market Overview
-            </CardTitle>
+            <CardTitle>Portfolio Balance</CardTitle>
+            <CardDescription>Your total assets value</CardDescription>
           </CardHeader>
           <CardContent>
-            <Tabs defaultValue="watchlist" className="w-full">
-              <TabsList className="grid w-full max-w-md grid-cols-3 bg-gray-800/50">
-                <TabsTrigger value="watchlist">Watchlist</TabsTrigger>
-                <TabsTrigger value="gainers">Gainers</TabsTrigger>
-                <TabsTrigger value="trending">Trending</TabsTrigger>
-              </TabsList>
-              <TabsContent value="watchlist" className="mt-4">
-                <div className="space-y-1">
-                  {[
-                    { name: "Bitcoin", symbol: "BTC", price: "$48,351.25", change: "+2.4%" },
-                    { name: "Ethereum", symbol: "ETH", price: "$3,250.18", change: "+3.1%" },
-                    { name: "Cardano", symbol: "ADA", price: "$0.53", change: "-0.8%" },
-                    { name: "Solana", symbol: "SOL", price: "$102.72", change: "+5.6%" },
-                    { name: "Polkadot", symbol: "DOT", price: "$6.32", change: "-1.2%" }
-                  ].map((coin, i) => (
-                    <div 
-                      key={i} 
-                      className="flex items-center justify-between p-3 hover:bg-gray-800/50 rounded-lg cursor-pointer transition-colors"
-                    >
-                      <div className="flex items-center">
-                        <div className="h-8 w-8 rounded-full bg-gray-700 mr-3 flex items-center justify-center font-bold text-xs">
-                          {coin.symbol.substring(0, 1)}
-                        </div>
-                        <div>
-                          <p className="font-medium">{coin.name}</p>
-                          <p className="text-sm text-gray-400">{coin.symbol}/USDT</p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-medium">{coin.price}</p>
-                        <p className={`text-sm ${coin.change.startsWith("+") ? "text-crypto-green" : "text-crypto-red"}`}>
-                          {coin.change}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
+            {isLoading ? (
+              <div className="animate-pulse h-20 bg-gray-800/50 rounded"></div>
+            ) : (
+              <>
+                <div className="text-3xl font-bold mb-2">
+                  {formatCurrency(totalPortfolioValueUsd)}
                 </div>
-              </TabsContent>
-              <TabsContent value="gainers" className="mt-4">
-                <div className="p-6 text-center text-gray-400">
-                  Top gainers will be displayed here.
+                <div className="text-sm text-green-400">
+                  +2.4% ($563.39) today
                 </div>
-              </TabsContent>
-              <TabsContent value="trending" className="mt-4">
-                <div className="p-6 text-center text-gray-400">
-                  Trending assets will be displayed here.
-                </div>
-              </TabsContent>
-            </Tabs>
+              </>
+            )}
           </CardContent>
         </Card>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card className="bg-crypto-card border-gray-800">
-            <CardHeader>
-              <CardTitle>Your Portfolio</CardTitle>
-              <CardDescription>Asset allocation</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-center h-[200px]">
-                <div className="w-32 h-32 rounded-full border-8 border-crypto-purple relative">
-                  <div 
-                    className="absolute top-0 right-0 w-1/2 h-full rounded-r-full border-8 border-crypto-teal" 
-                    style={{ borderLeft: 0, transform: "rotate(45deg)" }}
-                  ></div>
-                  <div 
-                    className="absolute bottom-0 left-0 w-1/2 h-1/3 rounded-bl-full border-8 border-gray-500" 
-                    style={{ borderTop: 0, borderRight: 0 }}
-                  ></div>
-                </div>
+
+        <Card className="flex-1 border-gray-800 bg-crypto-blue/20 backdrop-blur-sm">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div>
+              <CardTitle>Market Overview</CardTitle>
+              <CardDescription>Top cryptocurrency prices</CardDescription>
+            </div>
+            <Tabs defaultValue="1W" className="w-32">
+              <TabsList className="grid grid-cols-4 h-7">
+                <TabsTrigger 
+                  value="1D" 
+                  className="text-xs"
+                  onClick={() => setTimeframe("1D")}
+                >
+                  1D
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="1W" 
+                  className="text-xs"
+                  onClick={() => setTimeframe("1W")}
+                >
+                  1W
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="1M" 
+                  className="text-xs"
+                  onClick={() => setTimeframe("1M")}
+                >
+                  1M
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="1Y" 
+                  className="text-xs"
+                  onClick={() => setTimeframe("1Y")}
+                >
+                  1Y
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[200px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart
+                  data={mockPriceData}
+                  margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+                >
+                  <defs>
+                    <linearGradient id="colorBTC" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#644DFF" stopOpacity={0.8} />
+                      <stop offset="95%" stopColor="#644DFF" stopOpacity={0} />
+                    </linearGradient>
+                    <linearGradient id="colorETH" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#38BDF8" stopOpacity={0.8} />
+                      <stop offset="95%" stopColor="#38BDF8" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <XAxis
+                    dataKey="name"
+                    stroke="#6B7280"
+                    fontSize={12}
+                    tickLine={false}
+                    axisLine={false}
+                  />
+                  <YAxis
+                    stroke="#6B7280"
+                    fontSize={12}
+                    tickLine={false}
+                    axisLine={false}
+                    tickFormatter={(value) => `$${value}`}
+                  />
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    vertical={false}
+                    stroke="#374151"
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "#1F2937",
+                      borderColor: "#374151",
+                      borderRadius: "0.5rem",
+                      color: "#F9FAFB",
+                    }}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="BTC"
+                    stroke="#644DFF"
+                    fillOpacity={1}
+                    fill="url(#colorBTC)"
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="ETH"
+                    stroke="#38BDF8"
+                    fillOpacity={1}
+                    fill="url(#colorETH)"
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div>
+        <Tabs defaultValue="crypto" className="w-full">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-semibold">Your Assets</h2>
+            <TabsList>
+              <TabsTrigger value="crypto">Crypto</TabsTrigger>
+              <TabsTrigger value="fiat">Fiat</TabsTrigger>
+            </TabsList>
+          </div>
+
+          <TabsContent value="crypto">
+            <div className="bg-crypto-blue/20 backdrop-blur-sm border border-gray-800 rounded-lg overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-gray-800">
+                      <th className="px-4 py-3 text-left text-sm font-medium text-gray-300">Asset</th>
+                      <th className="px-4 py-3 text-left text-sm font-medium text-gray-300">Balance</th>
+                      <th className="px-4 py-3 text-right text-sm font-medium text-gray-300">Value</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-800">
+                    {isLoading ? (
+                      Array(3).fill(0).map((_, i) => (
+                        <tr key={`loading-${i}`}>
+                          <td colSpan={3} className="px-4 py-4">
+                            <div className="animate-pulse h-6 bg-gray-800/50 rounded"></div>
+                          </td>
+                        </tr>
+                      ))
+                    ) : cryptoWallets && cryptoWallets.length > 0 ? (
+                      cryptoWallets.map((wallet) => {
+                        const value = Number(wallet.balance) * (wallet.currency_details?.exchange_rate_to_usd || 0);
+                        return (
+                          <tr key={wallet.id}>
+                            <td className="px-4 py-4">
+                              <div className="flex items-center">
+                                <div className="h-8 w-8 rounded-full bg-crypto-purple/20 flex items-center justify-center mr-3">
+                                  <span className="font-bold text-sm text-crypto-purple">
+                                    {wallet.crypto_code.substring(0, 2)}
+                                  </span>
+                                </div>
+                                <div>
+                                  <div className="font-medium">{wallet.currency_details?.name || wallet.crypto_code}</div>
+                                  <div className="text-sm text-gray-400">{wallet.crypto_code}</div>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="px-4 py-4">
+                              {formatCrypto(Number(wallet.balance), wallet.crypto_code)}
+                            </td>
+                            <td className="px-4 py-4 text-right">
+                              {formatCurrency(value)}
+                            </td>
+                          </tr>
+                        );
+                      })
+                    ) : (
+                      <tr>
+                        <td colSpan={3} className="px-4 py-8 text-center text-gray-400">
+                          You don't have any crypto assets yet.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
               </div>
-              <div className="grid grid-cols-3 gap-2 mt-4">
-                <div className="flex items-center">
-                  <div className="w-3 h-3 rounded-full bg-crypto-purple mr-2"></div>
-                  <span className="text-sm">BTC (45%)</span>
-                </div>
-                <div className="flex items-center">
-                  <div className="w-3 h-3 rounded-full bg-crypto-teal mr-2"></div>
-                  <span className="text-sm">ETH (35%)</span>
-                </div>
-                <div className="flex items-center">
-                  <div className="w-3 h-3 rounded-full bg-gray-500 mr-2"></div>
-                  <span className="text-sm">Others (20%)</span>
-                </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="fiat">
+            <div className="bg-crypto-blue/20 backdrop-blur-sm border border-gray-800 rounded-lg overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-gray-800">
+                      <th className="px-4 py-3 text-left text-sm font-medium text-gray-300">Currency</th>
+                      <th className="px-4 py-3 text-left text-sm font-medium text-gray-300">Balance</th>
+                      <th className="px-4 py-3 text-right text-sm font-medium text-gray-300">Value</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-800">
+                    {isLoading ? (
+                      Array(3).fill(0).map((_, i) => (
+                        <tr key={`loading-${i}`}>
+                          <td colSpan={3} className="px-4 py-4">
+                            <div className="animate-pulse h-6 bg-gray-800/50 rounded"></div>
+                          </td>
+                        </tr>
+                      ))
+                    ) : fiatAccounts && fiatAccounts.length > 0 ? (
+                      fiatAccounts.map((account) => {
+                        const value = Number(account.balance) * (account.currency_details?.exchange_rate_to_usd || 0);
+                        return (
+                          <tr key={account.id}>
+                            <td className="px-4 py-4">
+                              <div className="flex items-center">
+                                <div className="h-8 w-8 rounded-full bg-green-500/20 flex items-center justify-center mr-3">
+                                  <span className="font-bold text-sm text-green-500">
+                                    {account.currency_details?.symbol || account.currency_code.substring(0, 1)}
+                                  </span>
+                                </div>
+                                <div>
+                                  <div className="font-medium">{account.currency_details?.name || account.currency_code}</div>
+                                  <div className="text-sm text-gray-400">{account.currency_code}</div>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="px-4 py-4">
+                              {formatCurrency(Number(account.balance), account.currency_details?.symbol, 2)}
+                            </td>
+                            <td className="px-4 py-4 text-right">
+                              {formatCurrency(value)}
+                            </td>
+                          </tr>
+                        );
+                      })
+                    ) : (
+                      <tr>
+                        <td colSpan={3} className="px-4 py-8 text-center text-gray-400">
+                          You don't have any fiat balances yet.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
               </div>
-            </CardContent>
-          </Card>
-          
-          <Card className="bg-crypto-card border-gray-800">
-            <CardHeader>
-              <CardTitle>Recent Transactions</CardTitle>
-              <CardDescription>Last 5 transactions</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {[
-                  { type: "Buy", asset: "Bitcoin", amount: "0.025 BTC", value: "$1,208.78", time: "2h ago" },
-                  { type: "Sell", asset: "Ethereum", amount: "1.5 ETH", value: "$4,875.27", time: "1d ago" },
-                  { type: "Buy", asset: "Solana", amount: "10 SOL", value: "$1,027.20", time: "3d ago" },
-                ].map((tx, i) => (
-                  <div key={i} className="flex items-center justify-between">
-                    <div className="flex items-center">
-                      <div className={`h-8 w-8 rounded-full ${tx.type === "Buy" ? "bg-crypto-green/20" : "bg-crypto-red/20"} flex items-center justify-center mr-3`}>
-                        <DollarSignIcon className={`h-4 w-4 ${tx.type === "Buy" ? "text-crypto-green" : "text-crypto-red"}`} />
-                      </div>
-                      <div>
-                        <p className="font-medium">{tx.type} {tx.asset}</p>
-                        <p className="text-sm text-gray-400">{tx.amount}</p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-medium">{tx.value}</p>
-                      <p className="text-sm text-gray-400">{tx.time}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <Button variant="outline" className="w-full mt-4 border-gray-700">
-                View All Transactions
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
