@@ -1,12 +1,63 @@
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { ArrowRight, ShieldCheck, Zap, Activity } from "lucide-react";
+import { ArrowRight, ShieldCheck, Zap, Activity, ChevronDown } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
 const Index = () => {
   const { user } = useAuth();
+  const [currentPrices, setCurrentPrices] = useState([
+    { symbol: "BTC/USDT", price: 48351.25, change: "+2.4%" },
+    { symbol: "ETH/USDT", price: 3254.60, change: "+1.7%" },
+    { symbol: "SOL/USDT", price: 152.30, change: "+3.8%" },
+    { symbol: "ADA/USDT", price: 0.45, change: "-0.8%" }
+  ]);
+  const [activeFeature, setActiveFeature] = useState(0);
+
+  const features = [
+    {
+      title: "Trade with Confidence",
+      description: "Advanced security features protect your assets and trades around the clock",
+      icon: <ShieldCheck className="h-6 w-6 text-crypto-purple" />,
+      animation: "translate-y-0 opacity-100"
+    },
+    {
+      title: "Lightning Fast Execution",
+      description: "Execute trades at the speed of light with our optimized matching engine",
+      icon: <Zap className="h-6 w-6 text-crypto-purple" />,
+      animation: "translate-y-0 opacity-100"
+    },
+    {
+      title: "Low Trading Fees",
+      description: "Enjoy some of the lowest trading fees in the industry. More savings, more profits",
+      icon: <Activity className="h-6 w-6 text-crypto-purple" />,
+      animation: "translate-y-0 opacity-100"
+    }
+  ];
+
+  useEffect(() => {
+    // Simulate price updates
+    const interval = setInterval(() => {
+      setCurrentPrices(prev => 
+        prev.map(item => ({
+          ...item,
+          price: parseFloat((item.price + (Math.random() * 10 - 5) / 100).toFixed(2)),
+          change: (Math.random() > 0.5 ? "+" : "-") + (Math.random() * 5).toFixed(1) + "%"
+        }))
+      );
+    }, 3000);
+
+    // Rotate through features
+    const featureInterval = setInterval(() => {
+      setActiveFeature(prev => (prev + 1) % features.length);
+    }, 5000);
+
+    return () => {
+      clearInterval(interval);
+      clearInterval(featureInterval);
+    };
+  }, []);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -14,9 +65,14 @@ const Index = () => {
         <div className="container flex h-16 items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="h-8 w-8 rounded-full bg-crypto-gradient flex items-center justify-center">
-              <span className="font-bold text-white">FX</span>
+              {/* Paper plane logo */}
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white">
+                <path d="M21 5L2 12.5L9 13.5"></path>
+                <path d="M9 13.5L13 21L15 14.5L21 5"></path>
+                <path d="M2 12.5L9 13.5L13 21"></path>
+              </svg>
             </div>
-            <span className="font-bold text-xl text-white">FeatheredX</span>
+            <span className="font-bold text-xl text-white">SimplMonie</span>
           </div>
           
           <div>
@@ -33,112 +89,228 @@ const Index = () => {
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-12 flex flex-col lg:flex-row items-center gap-12">
-        <div className="flex-1 space-y-8">
-          <div>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight">
-              The Next-Gen <span className="text-gradient">Decentralized</span> Trading Experience
-            </h1>
-            <p className="mt-6 text-lg text-gray-300 max-w-2xl">
-              Trade cryptocurrencies, participate in token launches, and enjoy gaming rewards all in one secure platform.
-            </p>
+      {/* Hero Section */}
+      <div className="relative overflow-hidden bg-crypto-dark">
+        <div className="absolute inset-0 bg-crypto-gradient opacity-5 blur-3xl"></div>
+        <div className="container mx-auto px-4 pt-12 pb-24">
+          <div className="flex flex-col lg:flex-row items-center justify-between gap-12">
+            <div className="flex-1 space-y-8 animate-fade-in">
+              <div>
+                <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight">
+                  <span className="text-gradient">Simply</span> Better <br/> Digital Finance
+                </h1>
+                <p className="mt-6 text-lg text-gray-300 max-w-2xl">
+                  Trade cryptocurrencies, participate in token launches, and enjoy gaming rewards 
+                  all in one secure and intuitive platform.
+                </p>
+              </div>
+              
+              <div className="flex flex-col sm:flex-row gap-4 pt-4">
+                <Button 
+                  asChild
+                  size="lg" 
+                  className="bg-crypto-purple hover:bg-crypto-purple/90 text-white font-medium relative overflow-hidden"
+                >
+                  <Link to={user ? "/dashboard" : "/auth"}>
+                    {user ? "Dashboard" : "Get Started"} <ArrowRight className="ml-2 h-4 w-4" />
+                    <span className="absolute inset-0 bg-white/10 animate-pulse-glow pointer-events-none"></span>
+                  </Link>
+                </Button>
+                <Button 
+                  asChild
+                  size="lg" 
+                  variant="outline" 
+                  className="border-gray-700 hover:bg-gray-800"
+                >
+                  <Link to="/exchange">
+                    Start Trading
+                  </Link>
+                </Button>
+              </div>
+
+              {/* Live Tickers */}
+              <div className="bg-gray-800/30 border border-gray-700/50 rounded-lg p-3 backdrop-blur-sm">
+                <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
+                  {currentPrices.map((ticker, index) => (
+                    <div key={index} className="flex-shrink-0">
+                      <p className="text-sm text-gray-400">{ticker.symbol}</p>
+                      <p className="text-xl font-bold">${ticker.price.toLocaleString()}</p>
+                      <p className={`text-xs ${ticker.change.startsWith('+') ? 'text-crypto-green' : 'text-crypto-red'}`}>
+                        {ticker.change}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            
+            {/* Interactive Preview */}
+            <div className="flex-1 relative">
+              <div className="absolute inset-0 bg-crypto-gradient opacity-10 blur-3xl rounded-full animate-pulse-glow"></div>
+              <div className="glass-card relative rounded-2xl overflow-hidden border border-gray-700/50 w-full max-w-md transform hover:scale-105 transition-all duration-500">
+                <div className="p-6 pb-0">
+                  <h3 className="text-xl font-semibold mb-4">Trading Preview</h3>
+                  <div className="flex justify-between items-center mb-6">
+                    <div>
+                      <p className="text-sm text-gray-400">{currentPrices[0].symbol}</p>
+                      <p className="text-xl font-bold text-crypto-green">${currentPrices[0].price.toLocaleString()}</p>
+                      <p className="text-xs text-crypto-green">{currentPrices[0].change}</p>
+                    </div>
+                    <div className="h-16 w-24 bg-crypto-purple/10 rounded-lg flex items-center justify-center relative">
+                      {/* Dynamic chart placeholder with animated line */}
+                      <svg viewBox="0 0 100 40" className="w-full h-full">
+                        <path 
+                          d="M0,20 C15,15 20,25 30,15 C40,5 50,20 60,10 C70,0 80,15 90,5 L90,40 L0,40 Z" 
+                          fill="rgba(100, 77, 255, 0.1)"
+                          stroke="#644DFF"
+                          strokeWidth="1.5"
+                        />
+                      </svg>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-gray-800/50 rounded-lg p-3">
+                      <p className="text-xs text-gray-400">24h Volume</p>
+                      <p className="font-medium">$1.8B</p>
+                    </div>
+                    <div className="bg-gray-800/50 rounded-lg p-3">
+                      <p className="text-xs text-gray-400">24h Change</p>
+                      <p className="font-medium text-crypto-green">+3.2%</p>
+                    </div>
+                  </div>
+                  <div className="mt-4 bg-crypto-purple/10 rounded-lg p-3">
+                    <div className="flex justify-between items-center">
+                      <p className="text-sm font-medium">Trade Now</p>
+                      <div className="flex space-x-2">
+                        <Button size="sm" variant="ghost" className="h-8 px-2 py-1 text-xs bg-crypto-purple/20 hover:bg-crypto-purple/40">Buy</Button>
+                        <Button size="sm" variant="ghost" className="h-8 px-2 py-1 text-xs bg-gray-700/50 hover:bg-gray-700">Sell</Button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="h-48 w-full bg-crypto-purple/5 mt-6 relative overflow-hidden">
+                  {/* Advanced animated chart */}
+                  <div className="absolute inset-0 flex items-end">
+                    <svg viewBox="0 0 400 100" className="w-full h-full" preserveAspectRatio="none">
+                      <path
+                        d="M0,50 C30,30 70,80 100,50 C130,20 170,60 200,40 C230,20 270,60 300,30 C330,10 370,50 400,30"
+                        fill="none"
+                        stroke="#644DFF"
+                        strokeWidth="2"
+                        className="animate-pulse-glow"
+                      />
+                      <path
+                        d="M0,50 C30,30 70,80 100,50 C130,20 170,60 200,40 C230,20 270,60 300,30 C330,10 370,50 400,30"
+                        fill="none"
+                        stroke="#33FFE0"
+                        strokeWidth="1"
+                        strokeDasharray="5,5"
+                        className="opacity-70"
+                      />
+                    </svg>
+                  </div>
+                  {/* Time periods */}
+                  <div className="absolute bottom-0 left-0 right-0 flex justify-between px-4 py-2 bg-gray-900/50 text-xs">
+                    <span className="text-crypto-purple">1H</span>
+                    <span>1D</span>
+                    <span>1W</span>
+                    <span>1M</span>
+                    <span>1Y</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Features Section */}
+      <div className="bg-crypto-blue py-20">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold mb-4">Why Choose SimplMonie?</h2>
+            <p className="text-gray-300 max-w-2xl mx-auto">Discover how we're changing the way people interact with digital assets</p>
           </div>
           
-          <div className="flex flex-col sm:flex-row gap-4 pt-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {features.map((feature, index) => (
+              <div 
+                key={index} 
+                className={`bg-gray-800/50 rounded-xl p-6 border border-gray-700/50 transform transition-all duration-500 ${index === activeFeature ? 'scale-105 border-crypto-purple/50' : 'scale-100'}`}
+              >
+                <div className="h-12 w-12 rounded-full bg-crypto-purple/20 flex items-center justify-center mb-4">
+                  {feature.icon}
+                </div>
+                <h3 className="text-xl font-medium mb-2">{feature.title}</h3>
+                <p className="text-gray-300">{feature.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Stats Section */}
+      <div className="bg-crypto-dark py-20 relative overflow-hidden">
+        <div className="absolute inset-0 bg-crypto-gradient opacity-5 blur-3xl"></div>
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+            <div className="bg-gray-800/30 backdrop-blur-sm rounded-xl p-6 border border-gray-700/50">
+              <div className="text-4xl font-bold text-gradient mb-2">$2.8B</div>
+              <p className="text-gray-300">24h Trading Volume</p>
+            </div>
+            <div className="bg-gray-800/30 backdrop-blur-sm rounded-xl p-6 border border-gray-700/50">
+              <div className="text-4xl font-bold text-gradient mb-2">2.5M+</div>
+              <p className="text-gray-300">Global Users</p>
+            </div>
+            <div className="bg-gray-800/30 backdrop-blur-sm rounded-xl p-6 border border-gray-700/50">
+              <div className="text-4xl font-bold text-gradient mb-2">40+</div>
+              <p className="text-gray-300">Digital Assets</p>
+            </div>
+            <div className="bg-gray-800/30 backdrop-blur-sm rounded-xl p-6 border border-gray-700/50">
+              <div className="text-4xl font-bold text-gradient mb-2">99.9%</div>
+              <p className="text-gray-300">Uptime</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* CTA */}
+      <div className="bg-crypto-blue py-16">
+        <div className="container mx-auto px-4 text-center">
+          <h2 className="text-3xl font-bold mb-6">Ready to Start Your Trading Journey?</h2>
+          <p className="text-gray-300 max-w-2xl mx-auto mb-8">Join millions of users and start trading today with our secure and user-friendly platform.</p>
+          
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button 
               asChild
               size="lg" 
               className="bg-crypto-purple hover:bg-crypto-purple/90 text-white font-medium"
             >
               <Link to={user ? "/dashboard" : "/auth"}>
-                {user ? "Dashboard" : "Launch App"} <ArrowRight className="ml-2 h-4 w-4" />
+                {user ? "Go to Dashboard" : "Create Account"} <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
             <Button 
               asChild
               size="lg" 
               variant="outline" 
-              className="border-gray-700 hover:bg-gray-800"
+              className="border-gray-700 bg-gray-800/50 hover:bg-gray-800"
             >
-              <Link to="/game">
-                Play & Earn
+              <Link to="/exchange">
+                Explore the Platform
               </Link>
             </Button>
           </div>
-          
-          <div className="flex flex-wrap gap-8 pt-6">
-            <div className="flex items-center gap-2">
-              <div className="h-10 w-10 rounded-full bg-crypto-purple/20 flex items-center justify-center">
-                <ShieldCheck className="h-5 w-5 text-crypto-purple" />
-              </div>
-              <div>
-                <p className="font-medium">Security First</p>
-                <p className="text-sm text-gray-400">Non-custodial trading</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="h-10 w-10 rounded-full bg-crypto-purple/20 flex items-center justify-center">
-                <Zap className="h-5 w-5 text-crypto-purple" />
-              </div>
-              <div>
-                <p className="font-medium">Lightning Fast</p>
-                <p className="text-sm text-gray-400">Instant transactions</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="h-10 w-10 rounded-full bg-crypto-purple/20 flex items-center justify-center">
-                <Activity className="h-5 w-5 text-crypto-purple" />
-              </div>
-              <div>
-                <p className="font-medium">Low Fees</p>
-                <p className="text-sm text-gray-400">Competitive pricing</p>
-              </div>
-            </div>
-          </div>
         </div>
-        
-        <div className="flex-1 flex justify-center">
-          <div className="relative">
-            <div className="absolute inset-0 bg-crypto-gradient opacity-20 blur-3xl rounded-full"></div>
-            <div className="glass-card relative rounded-2xl overflow-hidden border border-gray-700/50 w-full max-w-md">
-              <div className="p-6 pb-0">
-                <h3 className="text-xl font-semibold mb-4">Trading Preview</h3>
-                <div className="flex justify-between items-center mb-6">
-                  <div>
-                    <p className="text-sm text-gray-400">BTC/USDT</p>
-                    <p className="text-xl font-bold text-crypto-green">$48,351.25</p>
-                    <p className="text-xs text-crypto-green">+2.4%</p>
-                  </div>
-                  <div className="h-12 w-20 bg-crypto-purple/10 rounded-lg animate-pulse">
-                    {/* Chart placeholder */}
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-gray-800/50 rounded-lg p-3">
-                    <p className="text-xs text-gray-400">24h Volume</p>
-                    <p className="font-medium">$1.2B</p>
-                  </div>
-                  <div className="bg-gray-800/50 rounded-lg p-3">
-                    <p className="text-xs text-gray-400">24h Change</p>
-                    <p className="font-medium text-crypto-green">+2.4%</p>
-                  </div>
-                </div>
-              </div>
-              <div className="h-48 w-full bg-crypto-purple/5 mt-6 relative overflow-hidden">
-                {/* Mock chart */}
-                <div className="absolute inset-0 flex items-end">
-                  <svg viewBox="0 0 400 100" className="w-full h-full" preserveAspectRatio="none">
-                    <path
-                      d="M0,50 C30,30 70,80 100,50 C130,20 170,60 200,40 C230,20 270,60 300,30 C330,10 370,50 400,30"
-                      fill="none"
-                      stroke="#644DFF"
-                      strokeWidth="2"
-                    />
-                  </svg>
-                </div>
-              </div>
-            </div>
-          </div>
+      </div>
+      
+      {/* Learn more section */}
+      <div className="bg-crypto-dark py-8 relative overflow-hidden">
+        <div className="absolute inset-0 bg-crypto-gradient opacity-5 blur-3xl"></div>
+        <div className="container mx-auto px-4 text-center">
+          <Button variant="ghost" className="text-gray-400 hover:text-white group">
+            Learn more <ChevronDown className="ml-1 h-4 w-4 transition-transform group-hover:translate-y-1" />
+          </Button>
         </div>
       </div>
     </div>
