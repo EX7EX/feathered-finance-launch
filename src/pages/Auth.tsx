@@ -11,6 +11,7 @@ import { Separator } from "@/components/ui/separator";
 import { ArrowLeft, Mail, Lock, UserPlus, LogIn, Phone, Wallet } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { useToast } from '@/hooks/use-toast';
 
 const Auth = () => {
   const [email, setEmail] = useState('');
@@ -19,7 +20,16 @@ const Auth = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [tab, setTab] = useState('login');
   const [authMethod, setAuthMethod] = useState('email');
-  const { signIn, signUp, user } = useAuth();
+  const { 
+    signIn, 
+    signUp, 
+    signInWithGoogle, 
+    signInWithApple, 
+    signInWithFacebook,
+    signInWithPhone, 
+    user 
+  } = useAuth();
+  const { toast } = useToast();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -47,14 +57,58 @@ const Auth = () => {
     }
   };
 
-  const handleSocialAuth = (provider: string) => {
-    // This would be implemented with the appropriate auth provider
-    console.log(`Authenticating with ${provider}`);
+  const handlePhoneAuth = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    try {
+      setIsSubmitting(true);
+      
+      // Format the phone number to E.164 format (required by Supabase)
+      let formattedPhone = phone;
+      if (!formattedPhone.startsWith('+')) {
+        formattedPhone = '+' + formattedPhone;
+      }
+      
+      await signInWithPhone(formattedPhone);
+      
+    } catch (error) {
+      console.error('Phone authentication error:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleSocialAuth = async (provider: string) => {
+    try {
+      switch (provider) {
+        case 'google':
+          await signInWithGoogle();
+          break;
+        case 'apple':
+          await signInWithApple();
+          break;
+        case 'facebook':
+          await signInWithFacebook();
+          break;
+        default:
+          toast({
+            title: "Provider Not Supported",
+            description: "This authentication provider is not currently supported.",
+            variant: "destructive"
+          });
+      }
+    } catch (error) {
+      console.error(`${provider} authentication error:`, error);
+    }
   };
 
   const handleWalletAuth = () => {
-    // This would connect to wallet providers
-    console.log('Authenticating with wallet');
+    toast({
+      title: "Wallet Authentication",
+      description: "Please connect your wallet to authenticate.",
+    });
+    // In a real app, we would integrate with web3 wallets here
+    // For now, we use this as a demo only
   };
 
   const AuthMethodSelector = () => (
@@ -179,7 +233,7 @@ const Auth = () => {
                   )}
 
                   {authMethod === 'phone' && (
-                    <div className="space-y-4">
+                    <form onSubmit={handlePhoneAuth} className="space-y-4">
                       <div className="space-y-2">
                         <Label htmlFor="phone">Phone Number</Label>
                         <div className="relative">
@@ -191,13 +245,21 @@ const Auth = () => {
                             className="pl-9"
                             value={phone}
                             onChange={(e) => setPhone(e.target.value)}
+                            required
                           />
                         </div>
+                        <p className="text-xs text-gray-500">Enter your full phone number with country code (e.g. +1 for US)</p>
                       </div>
-                      <Button className="w-full bg-crypto-purple hover:bg-crypto-purple/90">
-                        Send Verification Code
+                      <Button className="w-full bg-crypto-purple hover:bg-crypto-purple/90" 
+                        disabled={isSubmitting} 
+                        type="submit">
+                        {isSubmitting ? (
+                          <div className="h-5 w-5 rounded-full border-2 border-white/30 border-t-white animate-spin"></div>
+                        ) : (
+                          "Send Verification Code"
+                        )}
                       </Button>
-                    </div>
+                    </form>
                   )}
 
                   {authMethod === 'wallet' && (
@@ -323,7 +385,7 @@ const Auth = () => {
                   )}
 
                   {authMethod === 'phone' && (
-                    <div className="space-y-4">
+                    <form onSubmit={handlePhoneAuth} className="space-y-4">
                       <div className="space-y-2">
                         <Label htmlFor="register-phone">Phone Number</Label>
                         <div className="relative">
@@ -335,13 +397,21 @@ const Auth = () => {
                             className="pl-9"
                             value={phone}
                             onChange={(e) => setPhone(e.target.value)}
+                            required
                           />
                         </div>
+                        <p className="text-xs text-gray-500">Enter your full phone number with country code</p>
                       </div>
-                      <Button className="w-full bg-crypto-purple hover:bg-crypto-purple/90">
-                        Send Verification Code
+                      <Button className="w-full bg-crypto-purple hover:bg-crypto-purple/90" 
+                        disabled={isSubmitting}
+                        type="submit">
+                        {isSubmitting ? (
+                          <div className="h-5 w-5 rounded-full border-2 border-white/30 border-t-white animate-spin"></div>
+                        ) : (
+                          "Send Verification Code"
+                        )}
                       </Button>
-                    </div>
+                    </form>
                   )}
 
                   {authMethod === 'wallet' && (

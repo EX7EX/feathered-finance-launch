@@ -24,19 +24,10 @@ import {
 } from "recharts";
 import { useUserProfile } from "@/hooks/use-user-profile";
 import { useUserAssets } from "@/hooks/use-user-assets";
-
-const mockPriceData = [
-  { name: "Jan", BTC: 42000, ETH: 3200 },
-  { name: "Feb", BTC: 44000, ETH: 3000 },
-  { name: "Mar", BTC: 47000, ETH: 3300 },
-  { name: "Apr", BTC: 45000, ETH: 3100 },
-  { name: "May", BTC: 49000, ETH: 3500 },
-  { name: "Jun", BTC: 50000, ETH: 3400 },
-  { name: "Jul", BTC: 48000, ETH: 3200 },
-];
+import { useMarketData } from "@/hooks/useMarketData";
 
 const Dashboard = () => {
-  const [timeframe, setTimeframe] = useState("1W");
+  const [timeframe, setTimeframe] = useState<'1d' | '7d' | '30d' | '90d'>('7d');
   const { profile, isLoading: isLoadingProfile } = useUserProfile();
   const { 
     cryptoWallets, 
@@ -44,6 +35,8 @@ const Dashboard = () => {
     isLoading: isLoadingAssets,
     totalPortfolioValueUsd 
   } = useUserAssets();
+  
+  const { chartData, loading: isChartLoading } = useMarketData(['bitcoin', 'ethereum'], timeframe);
 
   const isLoading = isLoadingProfile || isLoadingAssets;
 
@@ -61,6 +54,16 @@ const Dashboard = () => {
       minimumFractionDigits: decimals,
       maximumFractionDigits: decimals,
     })} ${symbol}`;
+  };
+
+  const getTimeframeLabel = () => {
+    switch(timeframe) {
+      case '1d': return '1D';
+      case '7d': return '1W';
+      case '30d': return '1M';
+      case '90d': return '3M';
+      default: return '1W';
+    }
   };
 
   return (
@@ -93,99 +96,108 @@ const Dashboard = () => {
               <CardTitle>Market Overview</CardTitle>
               <CardDescription>Top cryptocurrency prices</CardDescription>
             </div>
-            <Tabs defaultValue="1W" className="w-32">
+            <Tabs defaultValue={getTimeframeLabel()} className="w-32">
               <TabsList className="grid grid-cols-4 h-7">
                 <TabsTrigger 
                   value="1D" 
                   className="text-xs"
-                  onClick={() => setTimeframe("1D")}
+                  onClick={() => setTimeframe('1d')}
                 >
                   1D
                 </TabsTrigger>
                 <TabsTrigger 
                   value="1W" 
                   className="text-xs"
-                  onClick={() => setTimeframe("1W")}
+                  onClick={() => setTimeframe('7d')}
                 >
                   1W
                 </TabsTrigger>
                 <TabsTrigger 
                   value="1M" 
                   className="text-xs"
-                  onClick={() => setTimeframe("1M")}
+                  onClick={() => setTimeframe('30d')}
                 >
                   1M
                 </TabsTrigger>
                 <TabsTrigger 
-                  value="1Y" 
+                  value="3M" 
                   className="text-xs"
-                  onClick={() => setTimeframe("1Y")}
+                  onClick={() => setTimeframe('90d')}
                 >
-                  1Y
+                  3M
                 </TabsTrigger>
               </TabsList>
             </Tabs>
           </CardHeader>
           <CardContent>
             <div className="h-[200px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart
-                  data={mockPriceData}
-                  margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
-                >
-                  <defs>
-                    <linearGradient id="colorBTC" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#644DFF" stopOpacity={0.8} />
-                      <stop offset="95%" stopColor="#644DFF" stopOpacity={0} />
-                    </linearGradient>
-                    <linearGradient id="colorETH" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#38BDF8" stopOpacity={0.8} />
-                      <stop offset="95%" stopColor="#38BDF8" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <XAxis
-                    dataKey="name"
-                    stroke="#6B7280"
-                    fontSize={12}
-                    tickLine={false}
-                    axisLine={false}
-                  />
-                  <YAxis
-                    stroke="#6B7280"
-                    fontSize={12}
-                    tickLine={false}
-                    axisLine={false}
-                    tickFormatter={(value) => `$${value}`}
-                  />
-                  <CartesianGrid
-                    strokeDasharray="3 3"
-                    vertical={false}
-                    stroke="#374151"
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: "#1F2937",
-                      borderColor: "#374151",
-                      borderRadius: "0.5rem",
-                      color: "#F9FAFB",
-                    }}
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="BTC"
-                    stroke="#644DFF"
-                    fillOpacity={1}
-                    fill="url(#colorBTC)"
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="ETH"
-                    stroke="#38BDF8"
-                    fillOpacity={1}
-                    fill="url(#colorETH)"
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
+              {isChartLoading ? (
+                <div className="w-full h-full flex items-center justify-center">
+                  <div className="h-8 w-8 rounded-full border-2 border-crypto-purple/30 border-t-crypto-purple animate-spin"></div>
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart
+                    data={chartData}
+                    margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+                  >
+                    <defs>
+                      <linearGradient id="colorBTC" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#644DFF" stopOpacity={0.8} />
+                        <stop offset="95%" stopColor="#644DFF" stopOpacity={0} />
+                      </linearGradient>
+                      <linearGradient id="colorETH" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#38BDF8" stopOpacity={0.8} />
+                        <stop offset="95%" stopColor="#38BDF8" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <XAxis
+                      dataKey="name"
+                      stroke="#6B7280"
+                      fontSize={12}
+                      tickLine={false}
+                      axisLine={false}
+                    />
+                    <YAxis
+                      stroke="#6B7280"
+                      fontSize={12}
+                      tickLine={false}
+                      axisLine={false}
+                      tickFormatter={(value) => `$${value}`}
+                    />
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      vertical={false}
+                      stroke="#374151"
+                    />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: "#1F2937",
+                        borderColor: "#374151",
+                        borderRadius: "0.5rem",
+                        color: "#F9FAFB",
+                      }}
+                      formatter={(value) => [`$${Number(value).toLocaleString()}`, undefined]}
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="BIT"
+                      name="Bitcoin"
+                      stroke="#644DFF"
+                      fillOpacity={1}
+                      fill="url(#colorBTC)"
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="ETH"
+                      name="Ethereum"
+                      stroke="#38BDF8"
+                      fillOpacity={1}
+                      fill="url(#colorETH)"
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              )}
             </div>
           </CardContent>
         </Card>

@@ -10,6 +10,10 @@ interface AuthContextProps {
   isLoading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string, metadata?: any) => Promise<void>;
+  signInWithGoogle: () => Promise<void>;
+  signInWithApple: () => Promise<void>;
+  signInWithFacebook: () => Promise<void>;
+  signInWithPhone: (phone: string) => Promise<void>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
 }
@@ -104,6 +108,90 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const signInWithGoogle = async () => {
+    try {
+      setIsLoading(true);
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+      });
+      
+      if (error) throw error;
+    } catch (error: any) {
+      toast({
+        title: "Google Sign In Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const signInWithApple = async () => {
+    try {
+      setIsLoading(true);
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'apple',
+      });
+      
+      if (error) throw error;
+    } catch (error: any) {
+      toast({
+        title: "Apple Sign In Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const signInWithFacebook = async () => {
+    try {
+      setIsLoading(true);
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'facebook',
+      });
+      
+      if (error) throw error;
+    } catch (error: any) {
+      toast({
+        title: "Facebook Sign In Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const signInWithPhone = async (phone: string) => {
+    try {
+      setIsLoading(true);
+      const { error } = await supabase.auth.signInWithOtp({ 
+        phone
+      });
+      
+      if (error) {
+        throw error;
+      } else {
+        toast({
+          title: "Verification Code Sent",
+          description: "Please check your phone for the verification code.",
+        });
+      }
+    } catch (error: any) {
+      toast({
+        title: "Phone Sign In Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const signOut = async () => {
     try {
       setIsLoading(true);
@@ -155,6 +243,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       isLoading,
       signIn,
       signUp,
+      signInWithGoogle,
+      signInWithApple,
+      signInWithFacebook,
+      signInWithPhone,
       signOut,
       resetPassword
     }}>

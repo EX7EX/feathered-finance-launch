@@ -4,15 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { ArrowRight, ShieldCheck, Zap, Activity, ChevronDown } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useCryptoData } from "@/hooks/useCryptoData";
 
 const Index = () => {
   const { user } = useAuth();
-  const [currentPrices, setCurrentPrices] = useState([
-    { symbol: "BTC/USDT", price: 48351.25, change: "+2.4%" },
-    { symbol: "ETH/USDT", price: 3254.60, change: "+1.7%" },
-    { symbol: "SOL/USDT", price: 152.30, change: "+3.8%" },
-    { symbol: "ADA/USDT", price: 0.45, change: "-0.8%" }
-  ]);
+  const { data: currentPrices, loading } = useCryptoData(['bitcoin', 'ethereum', 'solana', 'cardano']);
   const [activeFeature, setActiveFeature] = useState(0);
 
   const features = [
@@ -37,26 +33,12 @@ const Index = () => {
   ];
 
   useEffect(() => {
-    // Simulate price updates
-    const interval = setInterval(() => {
-      setCurrentPrices(prev => 
-        prev.map(item => ({
-          ...item,
-          price: parseFloat((item.price + (Math.random() * 10 - 5) / 100).toFixed(2)),
-          change: (Math.random() > 0.5 ? "+" : "-") + (Math.random() * 5).toFixed(1) + "%"
-        }))
-      );
-    }, 3000);
-
     // Rotate through features
     const featureInterval = setInterval(() => {
       setActiveFeature(prev => (prev + 1) % features.length);
     }, 5000);
 
-    return () => {
-      clearInterval(interval);
-      clearInterval(featureInterval);
-    };
+    return () => clearInterval(featureInterval);
   }, []);
 
   return (
@@ -131,15 +113,25 @@ const Index = () => {
               {/* Live Tickers */}
               <div className="bg-gray-800/30 border border-gray-700/50 rounded-lg p-3 backdrop-blur-sm">
                 <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
-                  {currentPrices.map((ticker, index) => (
-                    <div key={index} className="flex-shrink-0">
-                      <p className="text-sm text-gray-400">{ticker.symbol}</p>
-                      <p className="text-xl font-bold">${ticker.price.toLocaleString()}</p>
-                      <p className={`text-xs ${ticker.change.startsWith('+') ? 'text-crypto-green' : 'text-crypto-red'}`}>
-                        {ticker.change}
-                      </p>
-                    </div>
-                  ))}
+                  {loading ? (
+                    Array(4).fill(0).map((_, index) => (
+                      <div key={index} className="flex-shrink-0">
+                        <div className="w-20 h-4 bg-gray-700/50 rounded animate-pulse mb-2"></div>
+                        <div className="w-24 h-6 bg-gray-700/50 rounded animate-pulse mb-2"></div>
+                        <div className="w-16 h-4 bg-gray-700/50 rounded animate-pulse"></div>
+                      </div>
+                    ))
+                  ) : (
+                    currentPrices.map((ticker, index) => (
+                      <div key={index} className="flex-shrink-0">
+                        <p className="text-sm text-gray-400">{ticker.symbol}</p>
+                        <p className="text-xl font-bold">${ticker.price.toLocaleString(undefined, {maximumFractionDigits: 2})}</p>
+                        <p className={`text-xs ${ticker.change24h.startsWith('+') ? 'text-crypto-green' : 'text-crypto-red'}`}>
+                          {ticker.change24h}
+                        </p>
+                      </div>
+                    ))
+                  )}
                 </div>
               </div>
             </div>
@@ -150,32 +142,57 @@ const Index = () => {
               <div className="glass-card relative rounded-2xl overflow-hidden border border-gray-700/50 w-full max-w-md transform hover:scale-105 transition-all duration-500">
                 <div className="p-6 pb-0">
                   <h3 className="text-xl font-semibold mb-4">Trading Preview</h3>
-                  <div className="flex justify-between items-center mb-6">
-                    <div>
-                      <p className="text-sm text-gray-400">{currentPrices[0].symbol}</p>
-                      <p className="text-xl font-bold text-crypto-green">${currentPrices[0].price.toLocaleString()}</p>
-                      <p className="text-xs text-crypto-green">{currentPrices[0].change}</p>
+                  {!loading && currentPrices.length > 0 ? (
+                    <div className="flex justify-between items-center mb-6">
+                      <div>
+                        <p className="text-sm text-gray-400">{currentPrices[0].symbol}</p>
+                        <p className={`text-xl font-bold ${currentPrices[0].change24h.startsWith('+') ? 'text-crypto-green' : 'text-crypto-red'}`}>
+                          ${currentPrices[0].price.toLocaleString(undefined, {maximumFractionDigits: 2})}
+                        </p>
+                        <p className={`text-xs ${currentPrices[0].change24h.startsWith('+') ? 'text-crypto-green' : 'text-crypto-red'}`}>
+                          {currentPrices[0].change24h}
+                        </p>
+                      </div>
+                      <div className="h-16 w-24 bg-crypto-purple/10 rounded-lg flex items-center justify-center relative">
+                        {/* Dynamic chart placeholder with animated line */}
+                        <svg viewBox="0 0 100 40" className="w-full h-full">
+                          <path 
+                            d="M0,20 C15,15 20,25 30,15 C40,5 50,20 60,10 C70,0 80,15 90,5 L90,40 L0,40 Z" 
+                            fill="rgba(100, 77, 255, 0.1)"
+                            stroke="#644DFF"
+                            strokeWidth="1.5"
+                          />
+                        </svg>
+                      </div>
                     </div>
-                    <div className="h-16 w-24 bg-crypto-purple/10 rounded-lg flex items-center justify-center relative">
-                      {/* Dynamic chart placeholder with animated line */}
-                      <svg viewBox="0 0 100 40" className="w-full h-full">
-                        <path 
-                          d="M0,20 C15,15 20,25 30,15 C40,5 50,20 60,10 C70,0 80,15 90,5 L90,40 L0,40 Z" 
-                          fill="rgba(100, 77, 255, 0.1)"
-                          stroke="#644DFF"
-                          strokeWidth="1.5"
-                        />
-                      </svg>
+                  ) : (
+                    <div className="flex justify-between items-center mb-6">
+                      <div>
+                        <div className="w-20 h-4 bg-gray-700/50 rounded animate-pulse mb-2"></div>
+                        <div className="w-24 h-6 bg-gray-700/50 rounded animate-pulse mb-2"></div>
+                        <div className="w-16 h-4 bg-gray-700/50 rounded animate-pulse"></div>
+                      </div>
+                      <div className="h-16 w-24 bg-gray-700/50 rounded animate-pulse"></div>
                     </div>
-                  </div>
+                  )}
                   <div className="grid grid-cols-2 gap-4">
                     <div className="bg-gray-800/50 rounded-lg p-3">
                       <p className="text-xs text-gray-400">24h Volume</p>
-                      <p className="font-medium">$1.8B</p>
+                      {!loading && currentPrices.length > 0 ? (
+                        <p className="font-medium">${(currentPrices[0].volume24h / 1e9).toFixed(1)}B</p>
+                      ) : (
+                        <div className="w-16 h-5 bg-gray-700/50 rounded animate-pulse"></div>
+                      )}
                     </div>
                     <div className="bg-gray-800/50 rounded-lg p-3">
                       <p className="text-xs text-gray-400">24h Change</p>
-                      <p className="font-medium text-crypto-green">+3.2%</p>
+                      {!loading && currentPrices.length > 0 ? (
+                        <p className={`font-medium ${currentPrices[0].change24h.startsWith('+') ? 'text-crypto-green' : 'text-crypto-red'}`}>
+                          {currentPrices[0].change24h}
+                        </p>
+                      ) : (
+                        <div className="w-16 h-5 bg-gray-700/50 rounded animate-pulse"></div>
+                      )}
                     </div>
                   </div>
                   <div className="mt-4 bg-crypto-purple/10 rounded-lg p-3">

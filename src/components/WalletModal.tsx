@@ -3,6 +3,7 @@ import React from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface WalletOption {
   id: string;
@@ -70,12 +71,57 @@ const WalletModal = ({ isOpen, onClose }: WalletModalProps) => {
     }
   ];
   
-  const handleConnectWallet = (wallet: WalletOption) => {
-    toast({
-      title: "Wallet Connection",
-      description: `Connecting to ${wallet.name}... This is a demo only.`,
-    });
-    onClose();
+  const handleConnectWallet = async (wallet: WalletOption) => {
+    try {
+      // In a real implementation, we would integrate with blockchain wallets
+      // For now, we'll simulate the connection and store a reference in user metadata
+      if (wallet.id === "metamask") {
+        // Check if window.ethereum exists (MetaMask is installed)
+        if (window.ethereum) {
+          try {
+            // Request account access
+            const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+            
+            // Get the first account
+            const account = accounts[0];
+            
+            toast({
+              title: "Wallet Connected",
+              description: `Connected to ${wallet.name}: ${account.substring(0, 6)}...${account.substring(account.length - 4)}`,
+            });
+            
+            onClose();
+          } catch (error) {
+            toast({
+              title: "Connection Failed",
+              description: "User denied wallet connection.",
+              variant: "destructive",
+            });
+          }
+        } else {
+          // MetaMask not installed
+          toast({
+            title: "MetaMask Not Detected",
+            description: "Please install MetaMask to use this feature.",
+            variant: "destructive",
+          });
+        }
+      } else {
+        // For other wallets (simulation)
+        toast({
+          title: "Wallet Connection",
+          description: `${wallet.name} integration coming soon. This is currently a demo.`,
+        });
+        onClose();
+      }
+    } catch (error) {
+      console.error("Wallet connection error:", error);
+      toast({
+        title: "Connection Error",
+        description: "Failed to connect wallet. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (

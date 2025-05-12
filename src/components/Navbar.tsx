@@ -20,6 +20,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
+declare global {
+  interface Window {
+    ethereum?: any;
+  }
+}
+
 const Navbar = () => {
   const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
   const { toast } = useToast();
