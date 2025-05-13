@@ -18,7 +18,16 @@ import React from "react";
 
 const App = () => {
   // Create a new QueryClient instance inside the component
-  const queryClient = new QueryClient();
+  // to avoid React hook issues
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        refetchOnWindowFocus: false,
+        retry: 1,
+        staleTime: 30000,
+      },
+    },
+  });
   
   return (
     <React.StrictMode>

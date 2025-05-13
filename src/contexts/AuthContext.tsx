@@ -3,6 +3,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { cleanupAuthState } from '@/lib/auth-utils';
 
 interface AuthContextProps {
   session: Session | null;
@@ -35,12 +36,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         
         if (event === 'SIGNED_IN') {
           toast({
-            title: "Welcome back!",
-            description: "You've successfully signed in.",
+            title: "Welcome to PEBL!",
+            description: "You've successfully signed in to your account.",
+            className: "bg-crypto-gradient text-white border-none",
           });
         } else if (event === 'SIGNED_OUT') {
           toast({
-            title: "Signed out",
+            title: "See you soon!",
             description: "You've been signed out successfully.",
           });
         }
@@ -60,6 +62,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signIn = async (email: string, password: string) => {
     try {
       setIsLoading(true);
+      // Clean up existing state first
+      cleanupAuthState();
+      
+      // Try global sign out to ensure clean state
+      try {
+        await supabase.auth.signOut({ scope: 'global' });
+      } catch (e) {
+        // Ignore errors here, continue with sign in
+      }
+      
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       
       if (error) {
@@ -80,11 +92,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signUp = async (email: string, password: string, metadata?: any) => {
     try {
       setIsLoading(true);
+      // First ensure we have a clean state
+      cleanupAuthState();
+      
       const { error } = await supabase.auth.signUp({ 
         email, 
         password,
         options: {
-          data: metadata
+          data: metadata,
+          emailRedirectTo: `${window.location.origin}/auth`,
         }
       });
       
@@ -92,8 +108,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         throw error;
       } else {
         toast({
-          title: "Sign Up Successful",
-          description: "Please check your email to confirm your account.",
+          title: "Welcome to PEBL!",
+          description: "We've sent you a confirmation email. Please check your inbox to activate your account.",
+          className: "bg-crypto-gradient text-white border-none",
         });
       }
     } catch (error: any) {
@@ -111,15 +128,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signInWithGoogle = async () => {
     try {
       setIsLoading(true);
+      // First ensure we have a clean state
+      cleanupAuthState();
+      
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth`,
+        }
       });
       
       if (error) throw error;
     } catch (error: any) {
       toast({
         title: "Google Sign In Failed",
-        description: error.message,
+        description: error.message === "Unsupported provider: provider is not enabled" 
+          ? "Google login is not enabled in Supabase. Please enable it in the Supabase dashboard."
+          : error.message,
         variant: "destructive",
       });
     } finally {
@@ -130,15 +155,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signInWithApple = async () => {
     try {
       setIsLoading(true);
+      // First ensure we have a clean state
+      cleanupAuthState();
+      
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'apple',
+        options: {
+          redirectTo: `${window.location.origin}/auth`,
+        }
       });
       
       if (error) throw error;
     } catch (error: any) {
       toast({
         title: "Apple Sign In Failed",
-        description: error.message,
+        description: error.message === "Unsupported provider: provider is not enabled" 
+          ? "Apple login is not enabled in Supabase. Please enable it in the Supabase dashboard."
+          : error.message,
         variant: "destructive",
       });
     } finally {
@@ -149,15 +182,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signInWithFacebook = async () => {
     try {
       setIsLoading(true);
+      // First ensure we have a clean state
+      cleanupAuthState();
+      
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'facebook',
+        options: {
+          redirectTo: `${window.location.origin}/auth`,
+        }
       });
       
       if (error) throw error;
     } catch (error: any) {
       toast({
         title: "Facebook Sign In Failed",
-        description: error.message,
+        description: error.message === "Unsupported provider: provider is not enabled" 
+          ? "Facebook login is not enabled in Supabase. Please enable it in the Supabase dashboard."
+          : error.message,
         variant: "destructive",
       });
     } finally {
@@ -168,8 +209,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signInWithPhone = async (phone: string) => {
     try {
       setIsLoading(true);
+      // First ensure we have a clean state
+      cleanupAuthState();
+      
       const { error } = await supabase.auth.signInWithOtp({ 
-        phone
+        phone,
+        options: {
+          shouldCreateUser: true,
+        }
       });
       
       if (error) {
@@ -177,7 +224,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       } else {
         toast({
           title: "Verification Code Sent",
-          description: "Please check your phone for the verification code.",
+          description: "We've sent a verification code to your phone number. Please enter it to continue.",
+          className: "bg-crypto-gradient text-white border-none",
         });
       }
     } catch (error: any) {
@@ -195,9 +243,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signOut = async () => {
     try {
       setIsLoading(true);
-      const { error } = await supabase.auth.signOut();
+      // Clean up auth state first
+      cleanupAuthState();
+      
+      // Attempt global sign out
+      const { error } = await supabase.auth.signOut({ scope: 'global' });
+      
       if (error) {
         throw error;
+      } else {
+        // Force page reload for a clean state
+        window.location.href = '/auth';
       }
     } catch (error: any) {
       toast({
@@ -222,7 +278,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       } else {
         toast({
           title: "Password Reset Email Sent",
-          description: "Check your email for a password reset link.",
+          description: "We've sent you an email with a password reset link. Please check your inbox.",
+          className: "bg-crypto-gradient text-white border-none",
         });
       }
     } catch (error: any) {
