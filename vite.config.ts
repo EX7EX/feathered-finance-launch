@@ -19,4 +19,9 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  build: {
+    sourcemap: mode !== 'production',
+    minify: mode === 'production',
+    assetsInlineLimit: 4096,
+  },
 }));

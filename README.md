@@ -1,73 +1,60 @@
-# Welcome to your Lovable project
+# Feathered Finance
 
-## Project info
+A modern financial application built with React, TypeScript, and Supabase.
 
-**URL**: https://lovable.dev/projects/15b77aa5-a5c9-4dc3-9c94-13bd93baee55
+## Project Structure
 
-## How can I edit this code?
+- `/src/components` - Reusable UI components
+- `/src/pages` - Application route pages
+- `/src/contexts` - React context providers
+- `/src/hooks` - Custom React hooks
+- `/src/lib` - Utility functions (including error handling utilities)
+- `/src/integrations` - Third-party service integrations (Supabase client configured with environment variables)
 
-There are several ways of editing your application.
+## Getting Started
 
-**Use Lovable**
+### Prerequisites
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/15b77aa5-a5c9-4dc3-9c94-13bd93baee55) and start prompting.
+- Node.js 16+ and npm
+- Supabase project set up (backend not managed in this repo - see Gaps section)
 
-Changes made via Lovable will be committed automatically to this repo.
+### Development
 
-**Use your preferred IDE**
+1. Clone the repository
+2. Set up environment variables: Copy `.env.example` to `.env` and fill in your Supabase credentials.
+3. Install dependencies: `npm install`
+4. Start development server: `npm run dev`
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### Supabase Integration
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+This project uses Supabase for backend functionality. The client is configured to use environment variables for connection.
 
-Follow these steps:
+Key tables (as referenced in the provided snippet - verify with your Supabase project):
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+- `profiles` - User profile information
+- `crypto_wallets` - User cryptocurrency wallets
+- `transactions` - Record of all user transactions
+- `supported_currencies` - Available currencies for trading
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+## Deployment
 
-# Step 3: Install the necessary dependencies.
-npm i
+- Push to main branch to trigger deployment via Lovable, or
+- Run `npm run build` and deploy the `dist` folder to your hosting provider (configured in vite.config.ts)
+- For mobile deployment, use Capacitor: `npm run build && npx cap sync`
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+## Best Practices
 
-**Edit a file directly in GitHub**
+- Use TypeScript interfaces for component props.
+- Follow folder structure conventions for new components.
+- Add descriptive commit messages.
+- Adhere to ESLint rules for code quality (stricter rules are now enabled).
+- Utilize the provided error handling utilities in `src/lib/errorHandling.ts`.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## Areas for Improvement and Known Gaps
 
-**Use GitHub Codespaces**
+Based on a project audit, the following significant gaps and areas for improvement exist:
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/15b77aa5-a5c9-4dc3-9c94-13bd93baee55) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+*   **Supabase Backend Management:** The Supabase database schema, migrations, and serverless functions are not managed within this repository. This means the backend setup needs to be handled separately from this codebase.
+*   **Automated Testing:** The project currently lacks automated tests (unit, integration, etc.). Implementing tests is crucial for improving code reliability and confidence in making changes.
+*   **Comprehensive Type Safety:** While stricter options are enabled in `tsconfig.json` and ESLint, further type-related improvements might be necessary throughout the codebase to fully leverage TypeScript's benefits.
+*   **Detailed Documentation:** While this README provides a good overview, more in-depth documentation on specific features, components, and state management could be beneficial.
