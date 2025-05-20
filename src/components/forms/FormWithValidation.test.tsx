@@ -20,7 +20,9 @@ vi.mock('@/integrations/supabase/client', () => ({
 }));
 
 vi.mock('@/hooks/use-toast', () => ({
-  toast: vi.fn(),
+  useToast: () => ({
+    toast: vi.fn(),
+  }),
 }));
 
 vi.mock('@/lib/auth-utils', () => ({
@@ -28,7 +30,16 @@ vi.mock('@/lib/auth-utils', () => ({
 }));
 
 vi.mock('@/lib/errorHandling', () => ({
-  getUserFriendlyErrorMessage: vi.fn(),
+  createErrorHandler: (context: string) => (error: unknown): Error => {
+    console.error(`${context} error:`, error);
+    return error instanceof Error ? error : new Error(`Unknown error in ${context}`);
+  },
+  getUserFriendlyErrorMessage: vi.fn((error: unknown) => {
+    if (error instanceof Error && error.message.includes('Invalid login credentials')) {
+      return 'Invalid email or password.';
+    }
+    return `Error: ${error instanceof Error ? error.message : String(error)}`;
+  }),
 }));
 
 // Helper function to render with auth provider

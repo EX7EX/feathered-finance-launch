@@ -23,7 +23,9 @@ vi.mock('@/integrations/supabase/client', () => ({
 }));
 
 vi.mock('@/hooks/use-toast', () => ({
-  toast: vi.fn(),
+  useToast: () => ({
+    toast: vi.fn(),
+  }),
 }));
 
 vi.mock('@/lib/auth-utils', () => ({
