@@ -24,4 +24,10 @@ export default defineConfig(({ mode }) => ({
     minify: mode === 'production',
     assetsInlineLimit: 4096,
   },
+  // Vitest test configuration
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: './src/setupTests.ts',
+  },
 }));

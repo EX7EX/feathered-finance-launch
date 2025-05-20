@@ -1,8 +1,8 @@
-
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { createErrorHandler, getUserFriendlyErrorMessage } from "@/lib/errorHandling";
 
 export interface UserProfile {
   id: string;
@@ -22,6 +22,9 @@ export interface UserProfile {
   two_factor_enabled: boolean;
 }
 
+// Create a scoped error handler for user profile operations
+const handleUserProfileError = createErrorHandler("User Profile");
+
 export function useUserProfile() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -37,8 +40,8 @@ export function useUserProfile() {
       .single();
     
     if (error) {
-      console.error('Error fetching user profile:', error);
-      throw error;
+      // Use the error handler to process and log the error before throwing
+      throw handleUserProfileError(error);
     }
     
     return data;
@@ -55,8 +58,8 @@ export function useUserProfile() {
       .single();
     
     if (error) {
-      console.error('Error updating user profile:', error);
-      throw error;
+      // Use the error handler to process and log the error before throwing
+      throw handleUserProfileError(error);
     }
     
     return data;
@@ -78,9 +81,10 @@ export function useUserProfile() {
       });
     },
     onError: (error: Error) => {
+      // Use getUserFriendlyErrorMessage for the toast description
       toast({
         title: 'Error',
-        description: `Failed to update profile: ${error.message}`,
+        description: `Failed to update profile: ${getUserFriendlyErrorMessage(error)}`,
         variant: 'destructive',
       });
     },

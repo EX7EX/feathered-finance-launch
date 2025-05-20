@@ -1,7 +1,7 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { createErrorHandler, getUserFriendlyErrorMessage } from "@/lib/errorHandling";
 
 export interface CryptoWallet {
   id: string;
@@ -35,6 +35,9 @@ export interface FiatAccount {
   };
 }
 
+// Create a scoped error handler for user asset operations
+const handleUserAssetsError = createErrorHandler("User Assets");
+
 export function useUserAssets() {
   const { user } = useAuth();
 
@@ -54,8 +57,8 @@ export function useUserAssets() {
       .eq('user_id', user.id);
     
     if (error) {
-      console.error('Error fetching crypto wallets:', error);
-      throw error;
+      // Use the error handler to process and log the error before throwing
+      throw handleUserAssetsError(error);
     }
     
     return data || [];
@@ -77,8 +80,8 @@ export function useUserAssets() {
       .eq('user_id', user.id);
     
     if (error) {
-      console.error('Error fetching fiat accounts:', error);
-      throw error;
+      // Use the error handler to process and log the error before throwing
+      throw handleUserAssetsError(error);
     }
     
     return data || [];
@@ -104,6 +107,8 @@ export function useUserAssets() {
     enabled: !!user
   });
 
+  // The 'error' returned by the hook will be the first error encountered by react-query
+  // handleUserAssetsError ensures it's logged and processed before being thrown.
   const isLoading = isLoadingCrypto || isLoadingFiat;
   const error = cryptoError || fiatError;
   

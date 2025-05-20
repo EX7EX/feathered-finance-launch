@@ -1,11 +1,11 @@
-
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { cleanupAuthState } from '@/lib/auth-utils';
+import { createErrorHandler, getUserFriendlyErrorMessage } from '@/lib/errorHandling';
 
-interface AuthContextProps {
+export interface AuthContextProps {
   session: Session | null;
   user: User | null;
   isLoading: boolean;
@@ -20,6 +20,9 @@ interface AuthContextProps {
 }
 
 const AuthContext = createContext<AuthContextProps | undefined>(undefined);
+
+// Create a scoped error handler for authentication operations
+const handleAuthError = createErrorHandler("Authentication");
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -60,8 +63,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [toast]);
 
   const signIn = async (email: string, password: string) => {
+    setIsLoading(true);
     try {
-      setIsLoading(true);
       // Clean up existing state first
       cleanupAuthState();
       
@@ -75,12 +78,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       
       if (error) {
-        throw error;
+        // Process and log the error, then throw
+        throw handleAuthError(error);
       }
     } catch (error: any) {
+      // Use getUserFriendlyErrorMessage for the toast description
       toast({
         title: "Sign In Failed",
-        description: error.message,
+        description: getUserFriendlyErrorMessage(error),
         variant: "destructive",
       });
       throw error;
@@ -90,8 +95,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const signUp = async (email: string, password: string, metadata?: any) => {
+    setIsLoading(true);
     try {
-      setIsLoading(true);
       // First ensure we have a clean state
       cleanupAuthState();
       
@@ -105,7 +110,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
       
       if (error) {
-        throw error;
+        // Process and log the error, then throw
+        throw handleAuthError(error);
       } else {
         toast({
           title: "Welcome to PEBL!",
@@ -114,9 +120,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         });
       }
     } catch (error: any) {
+      // Use getUserFriendlyErrorMessage for the toast description
       toast({
         title: "Sign Up Failed",
-        description: error.message,
+        description: getUserFriendlyErrorMessage(error),
         variant: "destructive",
       });
       throw error;
@@ -126,8 +133,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const signInWithGoogle = async () => {
+    setIsLoading(true);
     try {
-      setIsLoading(true);
       // First ensure we have a clean state
       cleanupAuthState();
       
@@ -138,23 +145,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       });
       
-      if (error) throw error;
+      if (error) {
+        // Process and log the error, then throw
+        throw handleAuthError(error);
+      }
     } catch (error: any) {
+      // Use getUserFriendlyErrorMessage for the toast description, adding specific handling for provider not enabled
+      let friendlyErrorMessage = getUserFriendlyErrorMessage(error);
+      if (error.message === "Unsupported provider: provider is not enabled") {
+         friendlyErrorMessage = "Google login is not enabled in Supabase. Please enable it in the Supabase dashboard.";
+      }
+
       toast({
         title: "Google Sign In Failed",
-        description: error.message === "Unsupported provider: provider is not enabled" 
-          ? "Google login is not enabled in Supabase. Please enable it in the Supabase dashboard."
-          : error.message,
+        description: friendlyErrorMessage,
         variant: "destructive",
       });
+      throw error;
     } finally {
       setIsLoading(false);
     }
   };
 
   const signInWithApple = async () => {
+    setIsLoading(true);
     try {
-      setIsLoading(true);
       // First ensure we have a clean state
       cleanupAuthState();
       
@@ -165,23 +180,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       });
       
-      if (error) throw error;
+      if (error) {
+         // Process and log the error, then throw
+        throw handleAuthError(error);
+      }
     } catch (error: any) {
+      // Use getUserFriendlyErrorMessage for the toast description, adding specific handling for provider not enabled
+       let friendlyErrorMessage = getUserFriendlyErrorMessage(error);
+       if (error.message === "Unsupported provider: provider is not enabled") {
+          friendlyErrorMessage = "Apple login is not enabled in Supabase. Please enable it in the Supabase dashboard.";
+       }
+
       toast({
         title: "Apple Sign In Failed",
-        description: error.message === "Unsupported provider: provider is not enabled" 
-          ? "Apple login is not enabled in Supabase. Please enable it in the Supabase dashboard."
-          : error.message,
+        description: friendlyErrorMessage,
         variant: "destructive",
       });
+      throw error;
     } finally {
       setIsLoading(false);
     }
   };
 
   const signInWithFacebook = async () => {
+    setIsLoading(true);
     try {
-      setIsLoading(true);
       // First ensure we have a clean state
       cleanupAuthState();
       
@@ -192,23 +215,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       });
       
-      if (error) throw error;
+      if (error) {
+         // Process and log the error, then throw
+        throw handleAuthError(error);
+      }
     } catch (error: any) {
+      // Use getUserFriendlyErrorMessage for the toast description, adding specific handling for provider not enabled
+       let friendlyErrorMessage = getUserFriendlyErrorMessage(error);
+       if (error.message === "Unsupported provider: provider is not enabled") {
+          friendlyErrorMessage = "Facebook login is not enabled in Supabase. Please enable it in the Supabase dashboard.";
+       }
+
       toast({
         title: "Facebook Sign In Failed",
-        description: error.message === "Unsupported provider: provider is not enabled" 
-          ? "Facebook login is not enabled in Supabase. Please enable it in the Supabase dashboard."
-          : error.message,
+        description: friendlyErrorMessage,
         variant: "destructive",
       });
+      throw error;
     } finally {
       setIsLoading(false);
     }
   };
 
   const signInWithPhone = async (phone: string) => {
+    setIsLoading(true);
     try {
-      setIsLoading(true);
       // First ensure we have a clean state
       cleanupAuthState();
       
@@ -220,7 +251,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
       
       if (error) {
-        throw error;
+         // Process and log the error, then throw
+        throw handleAuthError(error);
       } else {
         toast({
           title: "Verification Code Sent",
@@ -229,9 +261,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         });
       }
     } catch (error: any) {
+      // Use getUserFriendlyErrorMessage for the toast description
       toast({
         title: "Phone Sign In Failed",
-        description: error.message,
+        description: getUserFriendlyErrorMessage(error),
         variant: "destructive",
       });
       throw error;
@@ -241,8 +274,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const signOut = async () => {
+    setIsLoading(true);
     try {
-      setIsLoading(true);
       // Clean up auth state first
       cleanupAuthState();
       
@@ -250,66 +283,67 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const { error } = await supabase.auth.signOut({ scope: 'global' });
       
       if (error) {
-        throw error;
-      } else {
-        // Force page reload for a clean state
-        window.location.href = '/auth';
+         // Process and log the error, then throw
+        throw handleAuthError(error);
       }
     } catch (error: any) {
+      // Use getUserFriendlyErrorMessage for the toast description
       toast({
         title: "Sign Out Failed",
-        description: error.message,
+        description: getUserFriendlyErrorMessage(error),
         variant: "destructive",
       });
+      throw error;
     } finally {
       setIsLoading(false);
     }
   };
 
   const resetPassword = async (email: string) => {
+    setIsLoading(true);
     try {
-      setIsLoading(true);
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`,
+        redirectTo: `${window.location.origin}/auth/update-password`,
       });
-      
+
       if (error) {
-        throw error;
+         // Process and log the error, then throw
+        throw handleAuthError(error);
       } else {
         toast({
           title: "Password Reset Email Sent",
-          description: "We've sent you an email with a password reset link. Please check your inbox.",
+          description: "We've sent you an email with instructions to reset your password. Please check your inbox.",
           className: "bg-crypto-gradient text-white border-none",
         });
       }
     } catch (error: any) {
+       // Use getUserFriendlyErrorMessage for the toast description
       toast({
         title: "Password Reset Failed",
-        description: error.message,
+        description: getUserFriendlyErrorMessage(error),
         variant: "destructive",
       });
+      throw error;
     } finally {
       setIsLoading(false);
     }
   };
 
-  return (
-    <AuthContext.Provider value={{
-      user,
-      session,
-      isLoading,
-      signIn,
-      signUp,
-      signInWithGoogle,
-      signInWithApple,
-      signInWithFacebook,
-      signInWithPhone,
-      signOut,
-      resetPassword
-    }}>
-      {children}
-    </AuthContext.Provider>
-  );
+  const value = {
+    session,
+    user,
+    isLoading,
+    signIn,
+    signUp,
+    signInWithGoogle,
+    signInWithApple,
+    signInWithFacebook,
+    signInWithPhone,
+    signOut,
+    resetPassword,
+  };
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
 export const useAuth = () => {
