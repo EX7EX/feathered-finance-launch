@@ -1,0 +1,6 @@
+[test]
+environment = "jsdom"
+setupFiles = ["./test.setup.ts"]
+coverage = true
+coverageDirectory = "coverage"
+coverageReporters = ["text", "html"] 
