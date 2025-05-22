@@ -1,10 +1,9 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AuthProvider } from "./contexts/AuthContext";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
@@ -15,6 +14,13 @@ import Game from "./pages/Game";
 import Auth from "./pages/Auth";
 import Layout from "./components/Layout";
 import React from "react";
+import SignIn from "./pages/SignIn";
+import SignUp from "./pages/SignUp";
+
+const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
+  const { user } = useAuth();
+  return user ? <>{children}</> : <Navigate to="/auth/signin" />;
+};
 
 const App = () => {
   // Create a new QueryClient instance inside the component
@@ -36,14 +42,18 @@ const App = () => {
           <TooltipProvider>
             <Toaster />
             <Sonner />
-            <BrowserRouter>
+            <Router>
               <Routes>
                 <Route path="/" element={<Index />} />
-                <Route path="/auth" element={<Auth />} />
+                <Route path="/auth" element={<Auth />}>
+                  <Route index element={<Navigate to="/auth/signin" replace />} />
+                  <Route path="signin" element={<SignIn />} />
+                  <Route path="signup" element={<SignUp />} />
+                </Route>
                 <Route path="/dashboard" element={
-                  <ProtectedRoute>
+                  <PrivateRoute>
                     <Layout><Dashboard /></Layout>
-                  </ProtectedRoute>
+                  </PrivateRoute>
                 } />
                 <Route path="/exchange" element={
                   <ProtectedRoute>
@@ -62,7 +72,7 @@ const App = () => {
                 } />
                 <Route path="*" element={<NotFound />} />
               </Routes>
-            </BrowserRouter>
+            </Router>
           </TooltipProvider>
         </AuthProvider>
       </QueryClientProvider>

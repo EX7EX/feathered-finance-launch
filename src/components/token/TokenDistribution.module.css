@@ -1,0 +1,190 @@
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.form {
+  composes: glass-card from '../../styles/glassmorphism.css';
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 16px;
+  background: linear-gradient(90deg, #00f2fe 0%, #4facfe 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.formGroup label {
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.input {
+  composes: glass-input from '../../styles/glassmorphism.css';
+}
+
+.error {
+  color: #ff4d4d;
+  font-size: 0.875rem;
+  margin-top: 4px;
+}
+
+.recipientsSection {
+  composes: glass from '../../styles/glassmorphism.css';
+  padding: 24px;
+  border-radius: 12px;
+  margin-top: 16px;
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.sectionHeader h3 {
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0;
+}
+
+.addButton {
+  composes: glass-button from '../../styles/glassmorphism.css';
+  background: linear-gradient(90deg, #00f2fe 0%, #4facfe 100%);
+  border: none;
+  padding: 8px 16px;
+  font-size: 0.875rem;
+}
+
+.recipientRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 16px;
+  align-items: end;
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.recipientRow:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.removeButton {
+  composes: glass-button from '../../styles/glassmorphism.css';
+  background: rgba(255, 77, 77, 0.2);
+  border: none;
+  padding: 8px 16px;
+  font-size: 0.875rem;
+  color: #ff4d4d;
+}
+
+.removeButton:hover {
+  background: rgba(255, 77, 77, 0.3);
+}
+
+.vestingSection {
+  composes: glass from '../../styles/glassmorphism.css';
+  padding: 24px;
+  border-radius: 12px;
+  margin-top: 16px;
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  margin-bottom: 16px;
+}
+
+.checkbox {
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  outline: none;
+  cursor: pointer;
+  position: relative;
+}
+
+.checkbox:checked {
+  border-color: #4facfe;
+  background: #4facfe;
+}
+
+.checkbox:checked::after {
+  content: '✓';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 14px;
+}
+
+.vestingOptions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 24px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.submitButton {
+  composes: glass-button from '../../styles/glassmorphism.css';
+  background: linear-gradient(90deg, #00f2fe 0%, #4facfe 100%);
+  border: none;
+  font-size: 1.1rem;
+  padding: 16px 32px;
+  margin-top: 16px;
+  align-self: center;
+}
+
+.submitButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.45);
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 16px;
+  }
+
+  .form {
+    padding: 16px;
+  }
+
+  .title {
+    font-size: 1.5rem;
+  }
+
+  .recipientRow {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .vestingOptions {
+    grid-template-columns: 1fr;
+  }
+
+  .submitButton {
+    width: 100%;
+  }
+} 
