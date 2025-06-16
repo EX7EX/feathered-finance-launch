@@ -1,0 +1,90 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --glass-bg: rgba(255, 255, 255, 0.1);
+    --glass-border: rgba(255, 255, 255, 0.2);
+    --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    --glass-blur: blur(8px);
+    --glass-gradient: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.1),
+      rgba(255, 255, 255, 0.05)
+    );
+    --neon-purple: #644DFF;
+    --neon-teal: #33FFE0;
+    --neon-glow: 0 0 10px rgba(51, 255, 224, 0.5);
+  }
+}
+
+@layer components {
+  .glass {
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+    background-image: var(--glass-gradient);
+  }
+
+  .glass-card {
+    @apply glass rounded-2xl p-6 transition-all duration-300;
+  }
+
+  .glass-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.45);
+  }
+
+  .glass-button {
+    @apply glass rounded-lg px-6 py-3 text-white font-medium transition-all duration-300;
+    background: linear-gradient(90deg, var(--neon-purple), var(--neon-teal));
+    box-shadow: var(--neon-glow);
+  }
+
+  .glass-button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 0 20px rgba(51, 255, 224, 0.7);
+  }
+
+  .glass-button:active {
+    transform: translateY(1px);
+  }
+
+  .glass-nav {
+    @apply glass rounded-xl p-4 flex items-center gap-4;
+  }
+
+  .glass-input {
+    @apply glass rounded-lg px-4 py-2 w-full text-white transition-all duration-300;
+  }
+
+  .glass-input:focus {
+    background: rgba(255, 255, 255, 0.15);
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3);
+  }
+
+  .gradient-text {
+    @apply text-transparent bg-clip-text;
+    background: linear-gradient(90deg, var(--neon-purple), var(--neon-teal));
+  }
+
+  .neon-border {
+    border: 1px solid var(--neon-teal);
+    box-shadow: var(--neon-glow);
+  }
+
+  .neon-text {
+    color: var(--neon-teal);
+    text-shadow: var(--neon-glow);
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+} 
