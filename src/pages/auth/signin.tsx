@@ -39,6 +39,11 @@ const SignIn = () => {
               onChange={(e) => setPassword(e.target.value)}
               required
             />
+            <div className="text-right mt-1">
+              <Link href="/auth/forgot-password" className="text-sm text-blue-500 hover:text-blue-700">
+                Forgot password?
+              </Link>
+            </div>
           </div>
           <Button type="submit" className="w-full">
             Sign In

@@ -2,6 +2,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { AuthenticatedRequest } from '../middleware/auth';
 import { init as initApm } from '@elastic/apm-rum';
 import * as Sentry from '@sentry/react';
+import { createClient } from '@supabase/supabase-js';
 
 interface LogEntry {
   timestamp: string;
@@ -189,7 +190,9 @@ export const checkPerformanceHealth = async () => {
 // Helper Functions
 async function checkDatabase() {
   try {
-    // Implement database health check
+    // Perform a real query to the 'users' table
+    const { error } = await supabase.from('users').select('*').limit(1);
+    if (error) throw error;
     return { status: 'healthy' };
   } catch (error) {
     return { status: 'unhealthy', error };

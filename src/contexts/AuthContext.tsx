@@ -1,7 +1,11 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
-import { supabase } from '@/integrations/supabase/client';
+import { createClient } from '@supabase/supabase-js';
+const supabase = createClient(
+  import.meta.env.VITE_SUPABASE_URL!,
+  import.meta.env.VITE_SUPABASE_ANON_KEY!
+);
 import { useToast } from '@/hooks/use-toast';
 import { cleanupAuthState } from '@/lib/auth-utils';
 
@@ -36,13 +40,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         
         if (event === 'SIGNED_IN') {
           toast({
-            title: "Welcome to PEBL!",
+            title: "You've successfully signed in to your account.",
             description: "You've successfully signed in to your account.",
             className: "bg-crypto-gradient text-white border-none",
           });
         } else if (event === 'SIGNED_OUT') {
           toast({
-            title: "See you soon!",
+            title: "You've been signed out successfully.",
             description: "You've been signed out successfully.",
           });
         }
@@ -108,7 +112,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         throw error;
       } else {
         toast({
-          title: "Welcome to PEBL!",
+          title: "We've sent you a confirmation email. Please check your inbox to activate your account.",
           description: "We've sent you a confirmation email. Please check your inbox to activate your account.",
           className: "bg-crypto-gradient text-white border-none",
         });
@@ -223,7 +227,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         throw error;
       } else {
         toast({
-          title: "Verification Code Sent",
+          title: "We've sent a verification code to your phone number. Please enter it to continue.",
           description: "We've sent a verification code to your phone number. Please enter it to continue.",
           className: "bg-crypto-gradient text-white border-none",
         });
@@ -277,7 +281,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         throw error;
       } else {
         toast({
-          title: "Password Reset Email Sent",
+          title: "We've sent you an email with a password reset link. Please check your inbox.",
           description: "We've sent you an email with a password reset link. Please check your inbox.",
           className: "bg-crypto-gradient text-white border-none",
         });
