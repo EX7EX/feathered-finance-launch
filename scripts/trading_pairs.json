@@ -1,0 +1,62 @@
+[
+  {
+    "base_currency": "BTC",
+    "quote_currency": "USDT",
+    "symbol": "BTC/USDT",
+    "min_order_size": 0.0001,
+    "max_order_size": 1000,
+    "price_precision": 2,
+    "quantity_precision": 6,
+    "maker_fee": 0.001,
+    "taker_fee": 0.001,
+    "is_active": true
+  },
+  {
+    "base_currency": "ETH",
+    "quote_currency": "USDT",
+    "symbol": "ETH/USDT",
+    "min_order_size": 0.001,
+    "max_order_size": 10000,
+    "price_precision": 2,
+    "quantity_precision": 5,
+    "maker_fee": 0.001,
+    "taker_fee": 0.001,
+    "is_active": true
+  },
+  {
+    "base_currency": "SOL",
+    "quote_currency": "USDT",
+    "symbol": "SOL/USDT",
+    "min_order_size": 0.1,
+    "max_order_size": 100000,
+    "price_precision": 4,
+    "quantity_precision": 2,
+    "maker_fee": 0.001,
+    "taker_fee": 0.001,
+    "is_active": true
+  },
+  {
+    "base_currency": "ADA",
+    "quote_currency": "USDT",
+    "symbol": "ADA/USDT",
+    "min_order_size": 1,
+    "max_order_size": 1000000,
+    "price_precision": 6,
+    "quantity_precision": 0,
+    "maker_fee": 0.001,
+    "taker_fee": 0.001,
+    "is_active": true
+  },
+  {
+    "base_currency": "DOT",
+    "quote_currency": "USDT",
+    "symbol": "DOT/USDT",
+    "min_order_size": 0.1,
+    "max_order_size": 100000,
+    "price_precision": 4,
+    "quantity_precision": 1,
+    "maker_fee": 0.001,
+    "taker_fee": 0.001,
+    "is_active": true
+  }
+]
