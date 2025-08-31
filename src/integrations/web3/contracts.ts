@@ -27,6 +27,22 @@ export const DISTRIBUTION_ABI = [
 
 export const DISTRIBUTION_ADDRESS = process.env.VITE_DISTRIBUTION_ADDRESS || '';
 
+// Order Book Contract
+export const ORDER_BOOK_ABI = [
+  "event OrderCreated(uint256 id, address owner, uint8 orderType, address tokenA, address tokenB, uint256 amountA, uint256 amountB)",
+  "event OrderCancelled(uint256 id)",
+  "event OrderFilled(uint256 id)",
+  "constructor()",
+  "function createOrder(uint8 orderType, address tokenA, address tokenB, uint256 amountA, uint256 amountB)",
+  "function getOrders(address tokenA, address tokenB) view returns (tuple(uint256 id, address owner, uint8 orderType, address tokenA, address tokenB, uint256 amountA, uint256 amountB, bool isFilled, bool isCancelled)[])",
+  "function cancelOrder(uint256 orderId)",
+  "function executeTrade(uint256 buyOrderId, uint256 sellOrderId)",
+  "function operator() view returns (address)",
+  "function setOperator(address newOperator)"
+];
+
+export const ORDER_BOOK_ADDRESS = process.env.VITE_ORDER_BOOK_ADDRESS || '0x5FbDB2315678afecb367f032d93F642f64180aa3'; // Example address
+
 // ERC20 Token Interface
 export const ERC20_ABI = [
   'function name() view returns (string)',

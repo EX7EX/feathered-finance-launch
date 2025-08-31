@@ -9,6 +9,8 @@ import {
   WalletIcon,
   SettingsIcon,
   HelpCircleIcon,
+  UserIcon,
+  TrophyIcon,
 } from "lucide-react";
 
 const Sidebar = () => {
@@ -23,6 +25,8 @@ const Sidebar = () => {
     { path: "/exchange", icon: <BarChartIcon className="h-5 w-5" />, label: "Exchange" },
     { path: "/launchpad", icon: <RocketIcon className="h-5 w-5" />, label: "Launchpad" },
     { path: "/game", icon: <GamepadIcon className="h-5 w-5" />, label: "Game" },
+    { path: "/leaderboard", icon: <TrophyIcon className="h-5 w-5" />, label: "Leaderboard" },
+    { path: "/profile", icon: <UserIcon className="h-5 w-5" />, label: "Profile" },
   ];
   
   const bottomNavItems = [

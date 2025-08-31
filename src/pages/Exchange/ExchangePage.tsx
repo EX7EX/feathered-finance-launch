@@ -1,5 +1,5 @@
-
-import React, { useState } from "react";
+import React, { useState, useEffect, useMemo } from "react";
+import { ethers } from "ethers";
 import { Button } from "@/components/ui/button";
 import { WalletIcon } from "lucide-react";
 import { useCryptoData } from "@/hooks/useCryptoData";
@@ -13,13 +13,14 @@ import PlaceOrderCard from "./components/PlaceOrderCard";
 import CoinInformation from "./components/CoinInformation";
 import OrderHistory from "./components/OrderHistory";
 import PairSelector from "./components/PairSelector";
+import { useOrderBook, OrderWithOwner } from "@/hooks/useOrderBook";
 
 // Define available trading pairs
 const availablePairs = [
-  { value: "BTC/USDT", label: "BTC/USDT", coinId: "bitcoin" },
-  { value: "ETH/USDT", label: "ETH/USDT", coinId: "ethereum" },
-  { value: "SOL/USDT", label: "SOL/USDT", coinId: "solana" },
-  { value: "ADA/USDT", label: "ADA/USDT", coinId: "cardano" }
+  { value: "BTC/USDT", label: "BTC/USDT", coinId: "bitcoin", tokenA: "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599", tokenB: "0xdAC17F958D2ee523a2206206994597C13D831ec7" },
+  { value: "ETH/USDT", label: "ETH/USDT", coinId: "ethereum", tokenA: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2", tokenB: "0xdAC17F958D2ee523a2206206994597C13D831ec7" },
+  { value: "SOL/USDT", label: "SOL/USDT", coinId: "solana", tokenA: "0x7d2768dE32b0b80b7a3454c06BdAc94A69DDc7A9", tokenB: "0xdAC17F958D2ee523a2206206994597C13D831ec7" },
+  { value: "ADA/USDT", label: "ADA/USDT", coinId: "cardano", tokenA: "0x9A642d6b33688DEF1325A541dA64C321b1615416", tokenB: "0xdAC17F958D2ee523a2206206994597C13D831ec7" }
 ];
 
 const ExchangePage = () => {
@@ -27,15 +28,38 @@ const ExchangePage = () => {
   const [selectedCoin, setSelectedCoin] = useState("bitcoin");
   const [selectedPair, setSelectedPair] = useState("BTC/USDT");
   const [timeframe, setTimeframe] = useState("1D");
-  const [orderHistory, setOrderHistory] = useState<Order[]>([]);
   const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
-  
+  const [userAddress, setUserAddress] = useState<string | null>(null);
+
+  const selectedPairData = availablePairs.find(p => p.value === selectedPair);
+
   // Get data from hooks
   const { data: cryptoData, loading: loadingCrypto } = useCryptoData(['bitcoin', 'ethereum', 'solana', 'cardano']);
   const { chartData, loading: loadingChart } = useMarketData([selectedCoin], getTimeframeParam(timeframe));
-  const { cryptoWallets, fiatAccounts } = useUserAssets();
+  const { orders, refetch: refetchOrders } = useOrderBook(selectedPairData?.tokenA || "", selectedPairData?.tokenB || "");
+
+  // Get user address
+  useEffect(() => {
+    const getAddress = async () => {
+      if (window.ethereum) {
+        try {
+          const provider = new ethers.providers.Web3Provider(window.ethereum);
+          const signer = provider.getSigner();
+          const address = await signer.getAddress();
+          setUserAddress(address);
+        } catch (error) {
+          console.error("Error getting user address:", error);
+        }
+      }
+    };
+    getAddress();
+  }, []);
+
+  const userOrders = useMemo(() => {
+    if (!userAddress) return [];
+    return orders.filter(order => order.owner.toLowerCase() === userAddress.toLowerCase());
+  }, [orders, userAddress]);
   
-  // Find the selected cryptocurrency in the data
   const selectedCryptoData = cryptoData.find(
     (crypto) => crypto.symbol === selectedPair
   ) || {
@@ -47,7 +71,6 @@ const ExchangePage = () => {
     image: "https://assets.coingecko.com/coins/images/1/large/bitcoin.png"
   };
   
-  // Handle pair change
   const handlePairChange = (pair: string) => {
     setSelectedPair(pair);
     const selectedPairData = availablePairs.find(p => p.value === pair);
@@ -56,7 +79,6 @@ const ExchangePage = () => {
     }
   };
   
-  // Convert timeframe to useMarketData parameter
   function getTimeframeParam(timeframe: string) {
     switch (timeframe) {
       case "1H": return "1h";
@@ -67,11 +89,6 @@ const ExchangePage = () => {
       default: return "7d";
     }
   }
-  
-  // Update order history
-  const updateOrderHistory = (newOrder: Order) => {
-    setOrderHistory(prev => [newOrder, ...prev].slice(0, 50));
-  };
 
   return (
     <div className="container mx-auto">
@@ -87,7 +104,7 @@ const ExchangePage = () => {
             onClick={() => setIsWalletModalOpen(true)}
           >
             <WalletIcon className="h-4 w-4" />
-            Connect Wallet
+            {userAddress ? `${userAddress.slice(0, 6)}...${userAddress.slice(-4)}` : "Connect Wallet"}
           </Button>
         </div>
         
@@ -102,9 +119,7 @@ const ExchangePage = () => {
                 />
                 <div className="flex items-center gap-2">
                   <span className="text-xl font-bold">
-                    {loadingCrypto 
-                      ? "Loading..." 
-                      : `$${formatCryptoValue(selectedCryptoData.price)}`}
+                    {loadingCrypto ? "Loading..." : `$${formatCryptoValue(selectedCryptoData.price)}`}
                   </span>
                   <PriceChangeIndicator change={selectedCryptoData.change24h} />
                 </div>
@@ -121,8 +136,17 @@ const ExchangePage = () => {
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <OrderBook selectedPair={selectedPair} selectedCryptoData={selectedCryptoData} />
-              <RecentTrades selectedPair={selectedPair} />
+              <OrderBook
+                selectedPair={selectedPair}
+                selectedCryptoData={selectedCryptoData}
+                tokenA={selectedPairData?.tokenA}
+                tokenB={selectedPairData?.tokenB}
+              />
+              <RecentTrades
+                selectedPair={selectedPair}
+                tokenA={selectedPairData?.tokenA}
+                tokenB={selectedPairData?.tokenB}
+              />
             </div>
           </div>
           
@@ -130,7 +154,9 @@ const ExchangePage = () => {
             <PlaceOrderCard 
               selectedPair={selectedPair}
               selectedCryptoData={selectedCryptoData}
-              onOrderPlaced={updateOrderHistory}
+              onOrderPlaced={refetchOrders}
+              tokenA={selectedPairData?.tokenA}
+              tokenB={selectedPairData?.tokenB}
             />
             
             <CoinInformation 
@@ -138,7 +164,7 @@ const ExchangePage = () => {
               selectedCryptoData={selectedCryptoData} 
             />
             
-            <OrderHistory orderHistory={orderHistory} />
+            <OrderHistory orderHistory={userOrders} onCancelOrder={refetchOrders} />
           </div>
         </div>
       </div>

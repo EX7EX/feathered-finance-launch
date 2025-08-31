@@ -11,6 +11,8 @@ import Dashboard from "./pages/Dashboard";
 import Exchange from "./pages/Exchange";
 import Launchpad from "./pages/Launchpad";
 import Game from "./pages/Game";
+import ProfilePage from "./pages/Profile/ProfilePage";
+import LeaderboardPage from "./pages/Leaderboard/LeaderboardPage";
 import Auth from "./pages/Auth";
 import Layout from "./components/Layout";
 import React from "react";
@@ -68,6 +70,16 @@ const App = () => {
                 <Route path="/game" element={
                   <ProtectedRoute>
                     <Layout><Game /></Layout>
+                  </ProtectedRoute>
+                } />
+                <Route path="/profile" element={
+                  <ProtectedRoute>
+                    <Layout><ProfilePage /></Layout>
+                  </ProtectedRoute>
+                } />
+                <Route path="/leaderboard" element={
+                  <ProtectedRoute>
+                    <Layout><LeaderboardPage /></Layout>
                   </ProtectedRoute>
                 } />
                 <Route path="*" element={<NotFound />} />
