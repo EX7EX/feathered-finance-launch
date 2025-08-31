@@ -1,0 +1,13 @@
+{
+  "name": "matching-engine-service",
+  "version": "1.0.0",
+  "description": "Off-chain matching engine for the DEX",
+  "main": "index.ts",
+  "scripts": {
+    "start": "bun run index.ts | pino-pretty",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
