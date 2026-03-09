@@ -16,7 +16,7 @@
     "noUnusedParameters": true,
     "paths": {
       "@/*": [
-        "src/*"
+        "./src/*"
       ]
     },
     "resolveJsonModule": true,
@@ -33,9 +33,5 @@
     "src",
     "src/types"
   ],
-  "references": [
-    {
-      "path": "./tsconfig.node.json"
-    }
-  ]
+  "references": []
 }

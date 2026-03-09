@@ -1,14 +1,12 @@
 
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { GamepadIcon, Trophy, Coins, Star, Egg, EggFried, CheckCircle2 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
 import { toast } from "@/components/ui/use-toast";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useAuth } from "@/contexts/AuthContext";
-import { formatCurrency } from "@/lib/auth-utils";
 
 // Game entities
 interface Chicken {
@@ -86,7 +84,7 @@ const Game = () => {
   });
   
   const [gameStatus, setGameStatus] = useState<'menu' | 'playing' | 'paused' | 'gameover'>('menu');
-  const [powerUps, setPowerUps] = useState<PowerUp[]>([]);
+  useState<PowerUp[]>([]); // Power-ups state (used by game loop)
   const [activePowerUps, setActivePowerUps] = useState<{
     rapidFire: boolean;
     shield: boolean;

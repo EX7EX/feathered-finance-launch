@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   Card,
   CardContent,
@@ -28,7 +28,7 @@ import { useMarketData } from "@/hooks/useMarketData";
 
 const Dashboard = () => {
   const [timeframe, setTimeframe] = useState<'1d' | '7d' | '30d' | '90d'>('7d');
-  const { profile, isLoading: isLoadingProfile } = useUserProfile();
+  const { isLoading: isLoadingProfile } = useUserProfile();
   const { 
     cryptoWallets, 
     fiatAccounts, 

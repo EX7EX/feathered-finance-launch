@@ -1,6 +1,4 @@
-import React from 'react';
-import { useRouter } from 'next/router';
-import Link from 'next/link';
+import { Link, useLocation } from 'react-router-dom';
 import styles from './BaseLayout.module.css';
 
 interface BaseLayoutProps {
@@ -8,24 +6,24 @@ interface BaseLayoutProps {
 }
 
 const BaseLayout: React.FC<BaseLayoutProps> = ({ children }) => {
-  const router = useRouter();
+  const location = useLocation();
 
   return (
     <div className={styles.layout}>
       <nav className={styles.nav}>
         <div className={styles.logo}>
-          <Link href="/">
+          <Link to="/">
             <span>Feathered Finance</span>
           </Link>
         </div>
         <div className={styles.navLinks}>
-          <Link href="/launchpad" className={router.pathname === '/launchpad' ? styles.active : ''}>
+          <Link to="/launchpad" className={location.pathname === '/launchpad' ? styles.active : ''}>
             Launchpad
           </Link>
-          <Link href="/dashboard" className={router.pathname === '/dashboard' ? styles.active : ''}>
+          <Link to="/dashboard" className={location.pathname === '/dashboard' ? styles.active : ''}>
             Dashboard
           </Link>
-          <Link href="/tokens" className={router.pathname === '/tokens' ? styles.active : ''}>
+          <Link to="/tokens" className={location.pathname === '/tokens' ? styles.active : ''}>
             Tokens
           </Link>
         </div>
@@ -39,10 +37,10 @@ const BaseLayout: React.FC<BaseLayoutProps> = ({ children }) => {
       <footer className={styles.footer}>
         <div className={styles.footerContent}>
           <div className={styles.footerLinks}>
-            <Link href="/about">About</Link>
-            <Link href="/terms">Terms</Link>
-            <Link href="/privacy">Privacy</Link>
-            <Link href="/support">Support</Link>
+            <Link to="/about">About</Link>
+            <Link to="/terms">Terms</Link>
+            <Link to="/privacy">Privacy</Link>
+            <Link to="/support">Support</Link>
           </div>
           <div className={styles.socialLinks}>
             <a href="https://twitter.com" target="_blank" rel="noopener noreferrer">Twitter</a>
@@ -55,4 +53,4 @@ const BaseLayout: React.FC<BaseLayoutProps> = ({ children }) => {
   );
 };
 
-export default BaseLayout; 
+export default BaseLayout;

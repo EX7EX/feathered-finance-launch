@@ -1,4 +1,3 @@
-import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
@@ -6,17 +5,8 @@ import { useToast } from '@/hooks/use-toast';
 import SignUp from '../SignUp';
 import { vi } from 'vitest';
 
-// Define types for our mocks
-interface AuthContextType {
-  signUp: (email: string, password: string) => Promise<void>;
-  signInWithGoogle: () => Promise<void>;
-  signInWithApple: () => Promise<void>;
-  signInWithFacebook: () => Promise<void>;
-}
+// Types used by mocks (kept for reference)
 
-interface ToastType {
-  toast: (props: { title: string; description: string; variant?: string }) => void;
-}
 
 // Mock the useAuth hook
 vi.mock('@/contexts/AuthContext', () => ({

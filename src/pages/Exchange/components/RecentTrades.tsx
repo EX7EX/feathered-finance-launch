@@ -1,5 +1,3 @@
-
-import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatCryptoValue } from "../ExchangePage";
 
@@ -15,9 +13,8 @@ interface Trade {
 }
 
 const RecentTrades = ({ selectedPair }: RecentTradesProps) => {
-  // Generate recent trades
   const generateRecentTrades = (): Trade[] => {
-    const trades = [];
+    const trades: Trade[] = [];
     const now = new Date();
     const basePrice = selectedPair.startsWith("BTC") ? 48351.25 : 
                     selectedPair.startsWith("ETH") ? 3254.60 : 
@@ -31,7 +28,7 @@ const RecentTrades = ({ selectedPair }: RecentTradesProps) => {
       const tradeTime = new Date(now.getTime() - (i * 15000));
       
       trades.push({
-        price: price,
+        price,
         amount: Number(amount.toFixed(4)),
         time: tradeTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
         type: Math.random() > 0.5 ? "buy" : "sell"
@@ -44,12 +41,12 @@ const RecentTrades = ({ selectedPair }: RecentTradesProps) => {
   const recentTrades = generateRecentTrades();
 
   return (
-    <Card className="bg-crypto-card border-gray-800">
+    <Card className="bg-card border-border">
       <CardHeader className="pb-0">
         <CardTitle className="text-lg">Recent Trades</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-3 text-xs text-gray-400 pb-2">
+        <div className="grid grid-cols-3 text-xs text-muted-foreground pb-2">
           <span>Price (USDT)</span>
           <span className="text-center">Amount ({selectedPair.split('/')[0]})</span>
           <span className="text-right">Time</span>
@@ -57,11 +54,11 @@ const RecentTrades = ({ selectedPair }: RecentTradesProps) => {
         <div className="space-y-1">
           {recentTrades.map((trade, i) => (
             <div key={i} className="grid grid-cols-3 text-sm">
-              <span className={trade.type === "buy" ? "text-crypto-green" : "text-crypto-red"}>
+              <span className={trade.type === "buy" ? "text-accent" : "text-destructive"}>
                 {formatCryptoValue(trade.price)}
               </span>
               <span className="text-center">{trade.amount.toFixed(4)}</span>
-              <span className="text-right text-gray-400">{trade.time}</span>
+              <span className="text-right text-muted-foreground">{trade.time}</span>
             </div>
           ))}
         </div>
