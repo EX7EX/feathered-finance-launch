@@ -1,5 +1,4 @@
 import { useLeaderboard } from '@/hooks/useLeaderboard';
-import { useLeaderboard } from '@/hooks/useLeaderboard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';

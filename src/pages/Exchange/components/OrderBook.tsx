@@ -1,5 +1,4 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatCryptoValue } from "../ExchangePage";
 import { CryptoPrice } from "@/hooks/useCryptoData";
 import { useOrderBook } from "@/hooks/useOrderBook";
