@@ -14,6 +14,116 @@ export type Database = {
   }
   public: {
     Tables: {
+      crypto_wallets: {
+        Row: {
+          address: string | null
+          address_verified: boolean
+          balance: number
+          blockchain: string | null
+          created_at: string | null
+          crypto_code: string
+          id: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          address?: string | null
+          address_verified?: boolean
+          balance?: number
+          blockchain?: string | null
+          created_at?: string | null
+          crypto_code: string
+          id?: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          address?: string | null
+          address_verified?: boolean
+          balance?: number
+          blockchain?: string | null
+          created_at?: string | null
+          crypto_code?: string
+          id?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crypto_wallets_crypto_code_fkey"
+            columns: ["crypto_code"]
+            isOneToOne: false
+            referencedRelation: "supported_currencies"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "crypto_wallets_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "leaderboard"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crypto_wallets_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fiat_accounts: {
+        Row: {
+          available_balance: number
+          balance: number
+          created_at: string | null
+          currency_code: string
+          id: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          available_balance?: number
+          balance?: number
+          created_at?: string | null
+          currency_code: string
+          id?: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          available_balance?: number
+          balance?: number
+          created_at?: string | null
+          currency_code?: string
+          id?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fiat_accounts_currency_code_fkey"
+            columns: ["currency_code"]
+            isOneToOne: false
+            referencedRelation: "supported_currencies"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "fiat_accounts_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "leaderboard"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fiat_accounts_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       game_scores: {
         Row: {
           chickens_defeated: number | null
@@ -47,10 +157,50 @@ export type Database = {
             foreignKeyName: "game_scores_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "leaderboard"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "game_scores_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
+      }
+      price_cache: {
+        Row: {
+          coin_id: string
+          current_price: number
+          image: string | null
+          market_cap: number | null
+          price_change_percentage_24h: number | null
+          symbol: string
+          total_volume: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          coin_id: string
+          current_price?: number
+          image?: string | null
+          market_cap?: number | null
+          price_change_percentage_24h?: number | null
+          symbol: string
+          total_volume?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          coin_id?: string
+          current_price?: number
+          image?: string | null
+          market_cap?: number | null
+          price_change_percentage_24h?: number | null
+          symbol?: string
+          total_volume?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       profiles: {
         Row: {
@@ -115,6 +265,45 @@ export type Database = {
         }
         Relationships: []
       }
+      supported_currencies: {
+        Row: {
+          code: string
+          created_at: string | null
+          decimals: number
+          exchange_rate_to_usd: number
+          icon_url: string | null
+          is_active: boolean
+          name: string
+          symbol: string
+          type: string
+          updated_at: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string | null
+          decimals?: number
+          exchange_rate_to_usd?: number
+          icon_url?: string | null
+          is_active?: boolean
+          name: string
+          symbol: string
+          type: string
+          updated_at?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string | null
+          decimals?: number
+          exchange_rate_to_usd?: number
+          icon_url?: string | null
+          is_active?: boolean
+          name?: string
+          symbol?: string
+          type?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       trade_history: {
         Row: {
           amount: number
@@ -157,6 +346,13 @@ export type Database = {
             foreignKeyName: "trade_history_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "leaderboard"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trade_history_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -164,7 +360,17 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      leaderboard: {
+        Row: {
+          avatar_url: string | null
+          id: string | null
+          points: number | null
+          total_trades: number | null
+          total_volume_usd: number | null
+          username: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       [_ in never]: never
