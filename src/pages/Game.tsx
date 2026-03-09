@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -161,7 +161,51 @@ const Game = () => {
     timePlayedSeconds: 0,
     longestCombo: 0
   });
-  
+
+  // Load high score from DB on mount
+  useEffect(() => {
+    if (!user) return;
+    const loadHighScore = async () => {
+      const { data } = await supabase
+        .from('game_scores')
+        .select('score')
+        .eq('user_id', user.id)
+        .order('score', { ascending: false })
+        .limit(1);
+      if (data && data.length > 0) {
+        setGameState(prev => ({ ...prev, highScore: data[0].score }));
+      }
+    };
+    loadHighScore();
+  }, [user]);
+
+  // Save score to DB when game ends
+  useEffect(() => {
+    if (gameStatus !== 'gameover' || !user) return;
+    const saveScore = async () => {
+      await supabase.from('game_scores').insert({
+        user_id: user.id,
+        score: gameState.score,
+        level: gameState.level,
+        chickens_defeated: metrics.chickensDefeated,
+        longest_combo: metrics.longestCombo,
+      });
+      // Update profile points
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('points')
+        .eq('id', user.id)
+        .single();
+      if (profile) {
+        await supabase
+          .from('profiles')
+          .update({ points: (profile.points || 0) + gameState.totalPebls })
+          .eq('id', user.id);
+      }
+    };
+    saveScore();
+  }, [gameStatus]);
+
   // Game loop handling
   useEffect(() => {
     if (!gameState.gameActive || !canvasRef.current || gameStatus !== 'playing') return;
