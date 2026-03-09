@@ -1400,7 +1400,7 @@ const Game = () => {
                             {achievement.icon}
                             {achievement.completed && (
                               <div className="absolute -bottom-1 -right-1 bg-crypto-purple rounded-full p-[1px]">
-                                <CircleCheck className="h-3 w-3 text-white" />
+                                <CheckCircle2 className="h-3 w-3 text-white" />
                               </div>
                             )}
                           </div>
