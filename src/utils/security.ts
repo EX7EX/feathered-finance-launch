@@ -22,7 +22,7 @@ const rateLimiter = new RateLimiter({
 });
 
 // Rate limiting middleware
-export const checkRateLimit = async (key: string): Promise<boolean> => {
+export const checkRateLimit = async (_key: string): Promise<boolean> => {
   const hasToken = await rateLimiter.tryRemoveTokens(1);
   return hasToken;
 };
@@ -43,12 +43,12 @@ export const verify2FAToken = (token: string, secret: string): boolean => {
 
 // Session management
 export const createSession = async (userId: string, supabase: ReturnType<typeof createClient>) => {
-  const { data, error } = await supabase
+  const { data, error } = await (supabase as any)
     .from('sessions')
     .insert([
       {
         user_id: userId,
-        expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
+        expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000),
       },
     ])
     .select()
@@ -59,7 +59,7 @@ export const createSession = async (userId: string, supabase: ReturnType<typeof 
 };
 
 export const validateSession = async (sessionId: string, supabase: ReturnType<typeof createClient>) => {
-  const { data, error } = await supabase
+  const { data, error } = await (supabase as any)
     .from('sessions')
     .select('*')
     .eq('id', sessionId)
@@ -98,7 +98,7 @@ export const verifyEmail = async (
   token: string,
   supabase: ReturnType<typeof createClient>
 ) => {
-  const { data, error } = await supabase
+  const { data, error } = await (supabase as any)
     .from('users')
     .update({ email_verified: true })
     .eq('email', email)
@@ -108,4 +108,4 @@ export const verifyEmail = async (
 
   if (error) throw error;
   return data;
-}; 
+};

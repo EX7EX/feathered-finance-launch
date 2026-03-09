@@ -1,4 +1,4 @@
-import React from 'react';
+import { useLeaderboard } from '@/hooks/useLeaderboard';
 import { useLeaderboard } from '@/hooks/useLeaderboard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';

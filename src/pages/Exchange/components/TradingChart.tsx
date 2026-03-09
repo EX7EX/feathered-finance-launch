@@ -1,10 +1,7 @@
 
-import React from "react";
 import { Button } from "@/components/ui/button";
 import { 
   ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
 } from "@/components/ui/chart";
 import { 
   Area, 
@@ -13,7 +10,6 @@ import {
   YAxis, 
   CartesianGrid, 
   Tooltip,
-  ResponsiveContainer
 } from "recharts";
 import { formatCryptoValue } from "../ExchangePage";
 import { MarketChartData } from "@/hooks/useMarketData";
