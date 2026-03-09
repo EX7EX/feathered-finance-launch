@@ -1,17 +1,17 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { ethers } from 'ethers';
+import { BrowserProvider, Contract, formatUnits } from 'ethers';
 import { ORDER_BOOK_ABI, ORDER_BOOK_ADDRESS, ERC20_ABI } from '@/integrations/web3/contracts';
 import { Order } from '@/pages/Exchange/ExchangePage';
 
 // Define the structure of an order coming from the smart contract
 interface ContractOrder {
-  id: ethers.BigNumber;
+  id: bigint;
   owner: string;
   orderType: number; // 0 for Buy, 1 for Sell
   tokenA: string;
   tokenB: string;
-  amountA: ethers.BigNumber;
-  amountB: ethers.BigNumber;
+  amountA: bigint;
+  amountB: bigint;
   isFilled: boolean;
   isCancelled: boolean;
 }
@@ -32,31 +32,31 @@ export const useOrderBook = (tokenA: string, tokenB: string) => {
     setLoading(true);
     try {
       if (window.ethereum && tokenA && tokenB) {
-        const provider = new ethers.providers.Web3Provider(window.ethereum);
-        const contract = new ethers.Contract(ORDER_BOOK_ADDRESS, ORDER_BOOK_ABI, provider);
+        const provider = new BrowserProvider(window.ethereum);
+        const contract = new Contract(ORDER_BOOK_ADDRESS, ORDER_BOOK_ABI, provider);
 
         // Fetch decimals for both tokens, using cache if available
         let tokenADecimals = decimalsCache.get(tokenA);
         let tokenBDecimals = decimalsCache.get(tokenB);
 
-        if (!tokenADecimals || !tokenBDecimals) {
-          const tokenAContract = new ethers.Contract(tokenA, ERC20_ABI, provider);
-          const tokenBContract = new ethers.Contract(tokenB, ERC20_ABI, provider);
+        if (tokenADecimals === undefined || tokenBDecimals === undefined) {
+          const tokenAContract = new Contract(tokenA, ERC20_ABI, provider);
+          const tokenBContract = new Contract(tokenB, ERC20_ABI, provider);
           const [aDecimals, bDecimals] = await Promise.all([
             tokenAContract.decimals(),
             tokenBContract.decimals(),
           ]);
-          tokenADecimals = aDecimals;
-          tokenBDecimals = bDecimals;
-          decimalsCache.set(tokenA, aDecimals);
-          decimalsCache.set(tokenB, bDecimals);
+          tokenADecimals = Number(aDecimals);
+          tokenBDecimals = Number(bDecimals);
+          decimalsCache.set(tokenA, tokenADecimals);
+          decimalsCache.set(tokenB, tokenBDecimals);
         }
 
         const contractOrders: ContractOrder[] = await contract.getOrders(tokenA, tokenB);
 
         const formattedOrders: OrderWithOwner[] = contractOrders.map(order => {
-            const formattedAmountA = parseFloat(ethers.utils.formatUnits(order.amountA, tokenADecimals));
-            const formattedAmountB = parseFloat(ethers.utils.formatUnits(order.amountB, tokenBDecimals));
+            const formattedAmountA = parseFloat(formatUnits(order.amountA, tokenADecimals));
+            const formattedAmountB = parseFloat(formatUnits(order.amountB, tokenBDecimals));
 
             return {
               id: order.id.toString(),
@@ -65,7 +65,7 @@ export const useOrderBook = (tokenA: string, tokenB: string) => {
               price: formattedAmountB / formattedAmountA,
               amount: formattedAmountA,
               total: formattedAmountB,
-              date: new Date(), // This is still a limitation, but acceptable for now
+              date: new Date(),
               status: order.isFilled ? 'filled' : order.isCancelled ? 'canceled' : 'open',
               pair: `${tokenA}/${tokenB}`,
             }

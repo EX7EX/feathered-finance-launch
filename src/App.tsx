@@ -18,6 +18,18 @@ import Layout from "./components/Layout";
 import React from "react";
 import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
+import { ErrorBoundary } from "./components/ErrorBoundary";
+
+// Move QueryClient outside component to prevent cache loss on re-render
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: 1,
+      staleTime: 30000,
+    },
+  },
+});
 
 const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
   const { user } = useAuth();
@@ -25,18 +37,6 @@ const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
 };
 
 const App = () => {
-  // Create a new QueryClient instance inside the component
-  // to avoid React hook issues
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: {
-        refetchOnWindowFocus: false,
-        retry: 1,
-        staleTime: 30000,
-      },
-    },
-  });
-  
   return (
     <React.StrictMode>
       <QueryClientProvider client={queryClient}>
@@ -45,45 +45,47 @@ const App = () => {
             <Toaster />
             <Sonner />
             <Router>
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/auth" element={<Auth />}>
-                  <Route index element={<Navigate to="/auth/signin" replace />} />
-                  <Route path="signin" element={<SignIn />} />
-                  <Route path="signup" element={<SignUp />} />
-                </Route>
-                <Route path="/dashboard" element={
-                  <PrivateRoute>
-                    <Layout><Dashboard /></Layout>
-                  </PrivateRoute>
-                } />
-                <Route path="/exchange" element={
-                  <ProtectedRoute>
-                    <Layout><Exchange /></Layout>
-                  </ProtectedRoute>
-                } />
-                <Route path="/launchpad" element={
-                  <ProtectedRoute>
-                    <Layout><Launchpad /></Layout>
-                  </ProtectedRoute>
-                } />
-                <Route path="/game" element={
-                  <ProtectedRoute>
-                    <Layout><Game /></Layout>
-                  </ProtectedRoute>
-                } />
-                <Route path="/profile" element={
-                  <ProtectedRoute>
-                    <Layout><ProfilePage /></Layout>
-                  </ProtectedRoute>
-                } />
-                <Route path="/leaderboard" element={
-                  <ProtectedRoute>
-                    <Layout><LeaderboardPage /></Layout>
-                  </ProtectedRoute>
-                } />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
+              <ErrorBoundary>
+                <Routes>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/auth" element={<Auth />}>
+                    <Route index element={<Navigate to="/auth/signin" replace />} />
+                    <Route path="signin" element={<SignIn />} />
+                    <Route path="signup" element={<SignUp />} />
+                  </Route>
+                  <Route path="/dashboard" element={
+                    <PrivateRoute>
+                      <Layout><Dashboard /></Layout>
+                    </PrivateRoute>
+                  } />
+                  <Route path="/exchange" element={
+                    <ProtectedRoute>
+                      <Layout><Exchange /></Layout>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/launchpad" element={
+                    <ProtectedRoute>
+                      <Layout><Launchpad /></Layout>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/game" element={
+                    <ProtectedRoute>
+                      <Layout><Game /></Layout>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/profile" element={
+                    <ProtectedRoute>
+                      <Layout><ProfilePage /></Layout>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/leaderboard" element={
+                    <ProtectedRoute>
+                      <Layout><LeaderboardPage /></Layout>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </ErrorBoundary>
             </Router>
           </TooltipProvider>
         </AuthProvider>
