@@ -84,7 +84,7 @@ const Game = () => {
   });
   
   const [gameStatus, setGameStatus] = useState<'menu' | 'playing' | 'paused' | 'gameover'>('menu');
-  const [powerUps, setPowerUps] = useState<PowerUp[]>([]);
+  const [_powerUps, setPowerUps] = useState<PowerUp[]>([]);
   const [activePowerUps, setActivePowerUps] = useState<{
     rapidFire: boolean;
     shield: boolean;

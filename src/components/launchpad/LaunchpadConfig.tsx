@@ -40,9 +40,10 @@ const LaunchpadConfig: React.FC = () => {
     },
   });
 
-  const _saleType = watch('saleType');
-  const _whitelistEnabled = watch('whitelistEnabled');
-  const _kycRequired = watch('kycRequired');
+  // Watch form values for conditional rendering
+  void watch('saleType');
+  void watch('whitelistEnabled');
+  void watch('kycRequired');
 
   const onSubmit = async (data: LaunchpadFormData) => {
     try {

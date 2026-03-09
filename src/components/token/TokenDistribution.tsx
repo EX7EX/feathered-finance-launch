@@ -38,13 +38,13 @@ const TokenDistribution: React.FC = () => {
 
   const addRecipient = () => {
     const currentRecipients = watch('recipients');
-    const _newRecipients = [...currentRecipients, { address: '', amount: '' }];
+    void [...currentRecipients, { address: '', amount: '' }];
     // TODO: Implement recipient addition logic using react-hook-form's useFieldArray
   };
 
   const removeRecipient = (index: number) => {
     const currentRecipients = watch('recipients');
-    const _newRecipients = currentRecipients.filter((_: { address: string; amount: string }, i: number) => i !== index);
+    void currentRecipients.filter((_: { address: string; amount: string }, i: number) => i !== index);
     // TODO: Implement recipient removal logic using react-hook-form's useFieldArray
   };
 

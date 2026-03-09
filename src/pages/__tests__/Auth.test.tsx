@@ -1,5 +1,4 @@
 import { render, screen } from '@testing-library/react';
-import { render, screen } from '@testing-library/react';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import Auth from '../Auth';
 import { vi } from 'vitest';

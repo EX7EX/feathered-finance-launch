@@ -133,8 +133,9 @@ describe('Security Utilities', () => {
       expect(qrCode).toMatch(/^data:image\/png;base64,/);
     });
 
-    it('verifies valid 2FA token', () => {
+    it('verifies valid 2FA token', async () => {
       const secret = generate2FASecret();
+      const { authenticator } = await import('otplib');
       const token = authenticator.generate(secret);
       expect(verify2FAToken(token, secret)).toBe(true);
     });

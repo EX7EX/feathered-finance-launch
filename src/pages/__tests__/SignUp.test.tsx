@@ -1,5 +1,4 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -7,6 +6,7 @@ import SignUp from '../SignUp';
 import { vi } from 'vitest';
 
 // Types used by mocks
+/* eslint-disable @typescript-eslint/no-unused-vars */
 type _AuthContextType = {
   signUp: (email: string, password: string) => Promise<void>;
   signInWithGoogle: () => Promise<void>;
@@ -17,6 +17,7 @@ type _AuthContextType = {
 type _ToastType = {
   toast: (props: { title: string; description: string; variant?: string }) => void;
 };
+/* eslint-enable @typescript-eslint/no-unused-vars */
 
 // Mock the useAuth hook
 vi.mock('@/contexts/AuthContext', () => ({
