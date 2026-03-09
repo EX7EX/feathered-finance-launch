@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { BrowserProvider, parseUnits } from "ethers";
+import { useState, useEffect } from "react";
+import { BrowserProvider, parseUnits, Contract } from "ethers";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -8,24 +8,6 @@ import { useToast } from "@/hooks/use-toast";
 import { Order } from "../ExchangePage";
 import { CryptoPrice } from "@/hooks/useCryptoData";
 import { ORDER_BOOK_ABI, ORDER_BOOK_ADDRESS, ERC20_ABI } from "@/integrations/web3/contracts";
-
-import { http, createPublicClient, encodeFunctionData, Hex } from "viem";
-import { base } from "viem/chains";
-import { createSmartAccountClient } from "permissionless";
-import { signerToSimpleSmartAccount } from "permissionless/accounts";
-import { createPimlicoPaymasterClient } from "permissionless/clients/pimlico";
-
-// --- Configuration for Paymaster ---
-const PAYMASTER_URL = `https://api.pimlico.io/v2/${base.id}/rpc?apikey=${import.meta.env.VITE_PIMLICO_API_KEY}`;
-const BUNDLER_URL = `https://api.pimlico.io/v1/${base.id}/rpc?apikey=${import.meta.env.VITE_PIMLICO_API_KEY}`;
-
-const publicClient = createPublicClient({
-  transport: http("https://mainnet.base.org"),
-});
-
-const paymasterClient = createPimlicoPaymasterClient({
-  transport: http(PAYMASTER_URL),
-});
 
 interface PlaceOrderCardProps {
   selectedPair: string;
@@ -73,27 +55,14 @@ const PlaceOrderCard = ({
       return;
     }
     if (!window.ethereum) {
-        toast({ title: "Wallet not connected", variant: "destructive" });
-        return;
+      toast({ title: "Wallet not connected", variant: "destructive" });
+      return;
     }
 
     setIsPlacingOrder(true);
     try {
-      const ethersProvider = new BrowserProvider(window.ethereum);
-      const ethersSigner = await ethersProvider.getSigner();
-
-      const smartAccount = await signerToSimpleSmartAccount(publicClient, {
-        signer: ethersSigner as any,
-        factoryAddress: "0x9406Cc6185a346906296840746125a0E44976454",
-        entryPoint: "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789",
-      });
-
-      const smartAccountClient = createSmartAccountClient({
-        account: smartAccount,
-        chain: base,
-        transport: http(BUNDLER_URL),
-        sponsorUserOperation: paymasterClient.sponsorUserOperation,
-      });
+      const provider = new BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
 
       const amount = action === 'buy' ? buyAmount : sellAmount;
       const price = action === 'buy' ? buyPrice : sellPrice;
@@ -109,45 +78,27 @@ const PlaceOrderCard = ({
       const tokenToApproveAddress = action === 'buy' ? tokenB : tokenA;
       const amountToApprove = action === 'buy' ? amountB : amountA;
 
-      const approveCallData = encodeFunctionData({
-        abi: ERC20_ABI,
-        functionName: "approve",
-        args: [ORDER_BOOK_ADDRESS as Hex, amountToApprove],
-      });
+      // Approve token spend
+      const tokenContract = new Contract(tokenToApproveAddress, ERC20_ABI, signer);
+      toast({ title: "Approving token spend..." });
+      const approveTx = await tokenContract.approve(ORDER_BOOK_ADDRESS, amountToApprove);
+      await approveTx.wait();
 
+      // Create order
+      const orderBook = new Contract(ORDER_BOOK_ADDRESS, ORDER_BOOK_ABI, signer);
       const orderTypeEnum = action === 'buy' ? 0 : 1;
-      const createOrderCallData = encodeFunctionData({
-        abi: ORDER_BOOK_ABI,
-        functionName: "createOrder",
-        args: [orderTypeEnum, tokenA as Hex, tokenB as Hex, amountA, amountB],
-      });
+      toast({ title: "Placing order..." });
+      const orderTx = await orderBook.createOrder(orderTypeEnum, tokenA, tokenB, amountA, amountB);
+      await orderTx.wait();
 
-      toast({ title: "Preparing gasless transaction..." });
-
-      await smartAccountClient.sendTransactions({
-        transactions: [
-          {
-            to: tokenToApproveAddress as Hex,
-            data: approveCallData,
-            value: 0n,
-          },
-          {
-            to: ORDER_BOOK_ADDRESS as Hex,
-            data: createOrderCallData,
-            value: 0n,
-          },
-        ],
-      });
-
-      toast({ title: "Order submitted!", description: "Your gasless transaction is being processed." });
-
+      toast({ title: "Order placed successfully!" });
       onOrderPlaced();
       if (action === 'buy') setBuyAmount("");
       else setSellAmount("");
 
     } catch (error) {
-      console.error("Error placing gasless order:", error);
-      toast({ title: "Error placing order", description: (error as any).message || "An unknown error occurred.", variant: "destructive" });
+      console.error("Error placing order:", error);
+      toast({ title: "Error placing order", description: (error as Error).message || "An unknown error occurred.", variant: "destructive" });
     } finally {
       setIsPlacingOrder(false);
     }

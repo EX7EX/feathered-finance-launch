@@ -1,4 +1,4 @@
-import { ethers } from 'ethers';
+// Web3 contract ABIs and addresses
 
 // Token Factory Contract
 export const TOKEN_FACTORY_ABI = [

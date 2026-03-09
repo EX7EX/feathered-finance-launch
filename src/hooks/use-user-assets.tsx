@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { createErrorHandler, getUserFriendlyErrorMessage } from "@/lib/errorHandling";
+import { createErrorHandler } from "@/lib/errorHandling";
 
 export interface CryptoWallet {
   id: string;

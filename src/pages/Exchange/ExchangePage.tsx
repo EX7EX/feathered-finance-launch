@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { BrowserProvider } from "ethers";
 import { Button } from "@/components/ui/button";
 import { WalletIcon, TrendingUpIcon, TrendingDownIcon } from "lucide-react";
@@ -140,8 +140,6 @@ const ExchangePage = () => {
               />
               <RecentTrades
                 selectedPair={selectedPair}
-                tokenA={selectedPairData?.tokenA}
-                tokenB={selectedPairData?.tokenB}
               />
             </div>
           </div>
