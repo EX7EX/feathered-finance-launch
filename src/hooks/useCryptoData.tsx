@@ -32,13 +32,6 @@ export const useCryptoData = (coins: string[] = ['bitcoin', 'ethereum', 'solana'
       try {
         setLoading(true);
 
-        const { data: responseData, error: fnError } = await supabase.functions.invoke(
-          'crypto-prices',
-          { body: null, method: 'GET', headers: {} }
-        );
-
-        // supabase.functions.invoke with GET doesn't support query params easily,
-        // so we'll call with the full URL instead
         const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
         const anonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
         
