@@ -18,7 +18,7 @@ const LeaderboardPage = () => {
     return (
       <div className="container mx-auto">
         <h1 className="text-3xl font-bold tracking-tight mb-6">Leaderboard</h1>
-        <Card className="bg-crypto-card border-gray-800">
+        <Card>
           <CardHeader>
             <CardTitle>Top Traders</CardTitle>
           </CardHeader>
@@ -31,20 +31,20 @@ const LeaderboardPage = () => {
   }
 
   if (error) {
-    return <div className="container mx-auto text-center text-red-500">Error loading leaderboard.</div>;
+    return <div className="container mx-auto text-center text-destructive">Error loading leaderboard.</div>;
   }
 
   return (
     <div className="container mx-auto">
       <h1 className="text-3xl font-bold tracking-tight mb-6">Leaderboard</h1>
-      <Card className="bg-crypto-card border-gray-800">
+      <Card>
         <CardHeader>
           <CardTitle>Top Traders</CardTitle>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
-              <TableRow className="border-gray-700">
+              <TableRow className="border-border">
                 <TableHead className="w-[80px]">Rank</TableHead>
                 <TableHead>User</TableHead>
                 <TableHead className="text-right">Points</TableHead>
@@ -52,8 +52,8 @@ const LeaderboardPage = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {leaderboard.map((user, index) => (
-                <TableRow key={user.id} className="border-gray-800">
+              {leaderboard.map((user: any, index: number) => (
+                <TableRow key={user.id} className="border-border">
                   <TableCell className="font-medium text-lg">{renderTrophy(index)}</TableCell>
                   <TableCell>
                     <div className="flex items-center gap-3">
@@ -64,7 +64,7 @@ const LeaderboardPage = () => {
                       <span>{user.username || 'Anonymous'}</span>
                     </div>
                   </TableCell>
-                  <TableCell className="text-right font-bold text-crypto-purple">{user.points.toLocaleString()}</TableCell>
+                  <TableCell className="text-right font-bold text-primary">{user.points.toLocaleString()}</TableCell>
                   <TableCell className="text-right">${user.total_volume_usd.toLocaleString()}</TableCell>
                 </TableRow>
               ))}
