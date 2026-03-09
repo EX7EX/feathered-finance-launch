@@ -14,7 +14,154 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      game_scores: {
+        Row: {
+          chickens_defeated: number | null
+          created_at: string | null
+          id: string
+          level: number
+          longest_combo: number | null
+          score: number
+          user_id: string
+        }
+        Insert: {
+          chickens_defeated?: number | null
+          created_at?: string | null
+          id?: string
+          level?: number
+          longest_combo?: number | null
+          score: number
+          user_id: string
+        }
+        Update: {
+          chickens_defeated?: number | null
+          created_at?: string | null
+          id?: string
+          level?: number
+          longest_combo?: number | null
+          score?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "game_scores_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          country: string | null
+          created_at: string | null
+          full_name: string | null
+          id: string
+          kyc_level: string | null
+          kyc_reference_id: string | null
+          kyc_verified: boolean | null
+          last_login: string | null
+          locale: string | null
+          phone: string | null
+          points: number | null
+          timezone: string | null
+          total_trades: number | null
+          total_volume_usd: number | null
+          two_factor_enabled: boolean | null
+          updated_at: string | null
+          username: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          country?: string | null
+          created_at?: string | null
+          full_name?: string | null
+          id: string
+          kyc_level?: string | null
+          kyc_reference_id?: string | null
+          kyc_verified?: boolean | null
+          last_login?: string | null
+          locale?: string | null
+          phone?: string | null
+          points?: number | null
+          timezone?: string | null
+          total_trades?: number | null
+          total_volume_usd?: number | null
+          two_factor_enabled?: boolean | null
+          updated_at?: string | null
+          username?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          country?: string | null
+          created_at?: string | null
+          full_name?: string | null
+          id?: string
+          kyc_level?: string | null
+          kyc_reference_id?: string | null
+          kyc_verified?: boolean | null
+          last_login?: string | null
+          locale?: string | null
+          phone?: string | null
+          points?: number | null
+          timezone?: string | null
+          total_trades?: number | null
+          total_volume_usd?: number | null
+          two_factor_enabled?: boolean | null
+          updated_at?: string | null
+          username?: string | null
+        }
+        Relationships: []
+      }
+      trade_history: {
+        Row: {
+          amount: number
+          created_at: string | null
+          id: string
+          pair: string
+          price: number
+          side: string
+          status: string | null
+          total: number
+          tx_hash: string | null
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string | null
+          id?: string
+          pair: string
+          price: number
+          side: string
+          status?: string | null
+          total: number
+          tx_hash?: string | null
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          id?: string
+          pair?: string
+          price?: number
+          side?: string
+          status?: string | null
+          total?: number
+          tx_hash?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trade_history_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
