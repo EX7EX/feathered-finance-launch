@@ -84,8 +84,7 @@ const Game = () => {
   });
   
   const [gameStatus, setGameStatus] = useState<'menu' | 'playing' | 'paused' | 'gameover'>('menu');
-  const powerUpsState = useState<PowerUp[]>([]);
-  const setPowerUps = powerUpsState[1];
+  useState<PowerUp[]>([]); // Power-ups state (used by game loop)
   const [activePowerUps, setActivePowerUps] = useState<{
     rapidFire: boolean;
     shield: boolean;
