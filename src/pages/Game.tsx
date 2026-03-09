@@ -84,8 +84,8 @@ const Game = () => {
   });
   
   const [gameStatus, setGameStatus] = useState<'menu' | 'playing' | 'paused' | 'gameover'>('menu');
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [, setPowerUps] = useState<PowerUp[]>([]);
+  const powerUpsState = useState<PowerUp[]>([]);
+  const setPowerUps = powerUpsState[1];
   const [activePowerUps, setActivePowerUps] = useState<{
     rapidFire: boolean;
     shield: boolean;
