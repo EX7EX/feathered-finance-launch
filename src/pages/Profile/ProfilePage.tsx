@@ -1,15 +1,15 @@
-import React, { useContext } from 'react';
-import { AuthContext } from '@/contexts/AuthContext';
-import { useUserProfile } from '@/hooks/useUserProfile';
+import React from 'react';
+import { useAuth } from '@/contexts/AuthContext';
+import { useUserProfile } from '@/hooks/use-user-profile';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const ProfilePage = () => {
-  const { user } = useContext(AuthContext);
-  const { profile, loading, error } = useUserProfile(user?.id);
+  const { user } = useAuth();
+  const { profile, isLoading, error } = useUserProfile();
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="container mx-auto">
         <h1 className="text-3xl font-bold tracking-tight mb-6">My Profile</h1>
@@ -29,13 +29,17 @@ const ProfilePage = () => {
   }
 
   if (error || !profile) {
-    return <div className="container mx-auto text-center text-red-500">Error loading profile.</div>;
+    return (
+      <div className="container mx-auto text-center text-destructive">
+        <p>Error loading profile. Please try again later.</p>
+      </div>
+    );
   }
 
   return (
     <div className="container mx-auto">
       <h1 className="text-3xl font-bold tracking-tight mb-6">My Profile</h1>
-      <Card className="w-full max-w-lg mx-auto bg-crypto-card border-gray-800">
+      <Card className="w-full max-w-lg mx-auto bg-card border-border">
         <CardHeader className="items-center text-center">
           <Avatar className="h-24 w-24 mb-4">
             <AvatarImage src={profile.avatar_url || ''} alt={profile.username} />
@@ -44,17 +48,19 @@ const ProfilePage = () => {
           <CardTitle className="text-2xl">{profile.username || 'Anonymous User'}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex justify-between items-center p-4 bg-gray-800/50 rounded-lg">
-            <span className="font-medium">Points</span>
-            <span className="text-lg font-bold text-crypto-purple">{profile.points.toLocaleString()}</span>
+          <div className="flex justify-between items-center p-4 bg-muted rounded-lg">
+            <span className="font-medium">Email</span>
+            <span className="text-muted-foreground">{user?.email || 'Not set'}</span>
           </div>
-          <div className="flex justify-between items-center p-4 bg-gray-800/50 rounded-lg">
-            <span className="font-medium">Total Trades</span>
-            <span className="text-lg font-bold">{profile.total_trades.toLocaleString()}</span>
+          <div className="flex justify-between items-center p-4 bg-muted rounded-lg">
+            <span className="font-medium">Full Name</span>
+            <span className="text-muted-foreground">{profile.full_name || 'Not set'}</span>
           </div>
-          <div className="flex justify-between items-center p-4 bg-gray-800/50 rounded-lg">
-            <span className="font-medium">Total Volume</span>
-            <span className="text-lg font-bold">${profile.total_volume_usd.toLocaleString()}</span>
+          <div className="flex justify-between items-center p-4 bg-muted rounded-lg">
+            <span className="font-medium">KYC Status</span>
+            <span className={`font-bold ${profile.kyc_verified ? 'text-accent' : 'text-muted-foreground'}`}>
+              {profile.kyc_verified ? 'Verified' : 'Unverified'}
+            </span>
           </div>
         </CardContent>
       </Card>

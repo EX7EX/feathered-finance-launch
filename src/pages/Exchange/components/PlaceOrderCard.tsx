@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { ethers } from "ethers";
+import { BrowserProvider, parseUnits } from "ethers";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -16,9 +16,8 @@ import { signerToSimpleSmartAccount } from "permissionless/accounts";
 import { createPimlicoPaymasterClient } from "permissionless/clients/pimlico";
 
 // --- Configuration for Paymaster ---
-// In a real app, these would be managed securely and not hardcoded.
-const PAYMASTER_URL = `https://api.pimlico.io/v2/${base.id}/rpc?apikey=${process.env.VITE_PIMLICO_API_KEY}`; // Placeholder for your Pimlico/Paymaster service URL
-const BUNDLER_URL = `https://api.pimlico.io/v1/${base.id}/rpc?apikey=${process.env.VITE_PIMLICO_API_KEY}`; // Placeholder for your Bundler service URL
+const PAYMASTER_URL = `https://api.pimlico.io/v2/${base.id}/rpc?apikey=${import.meta.env.VITE_PIMLICO_API_KEY}`;
+const BUNDLER_URL = `https://api.pimlico.io/v1/${base.id}/rpc?apikey=${import.meta.env.VITE_PIMLICO_API_KEY}`;
 
 const publicClient = createPublicClient({
   transport: http("https://mainnet.base.org"),
@@ -27,12 +26,11 @@ const publicClient = createPublicClient({
 const paymasterClient = createPimlicoPaymasterClient({
   transport: http(PAYMASTER_URL),
 });
-// ------------------------------------
 
 interface PlaceOrderCardProps {
   selectedPair: string;
   selectedCryptoData: CryptoPrice;
-  onOrderPlaced: (order?: Order) => void; // Make order optional as we refetch data now
+  onOrderPlaced: (order?: Order) => void;
   tokenA?: string;
   tokenB?: string;
 }
@@ -81,18 +79,15 @@ const PlaceOrderCard = ({
 
     setIsPlacingOrder(true);
     try {
-      // 1. Create a "Signer" from the user's EOA
-      const ethersProvider = new ethers.providers.Web3Provider(window.ethereum);
-      const ethersSigner = ethersProvider.getSigner();
+      const ethersProvider = new BrowserProvider(window.ethereum);
+      const ethersSigner = await ethersProvider.getSigner();
 
-      // 2. Create a Smart Account
       const smartAccount = await signerToSimpleSmartAccount(publicClient, {
-        signer: ethersSigner as any, // Cast needed for compatibility
-        factoryAddress: "0x9406Cc6185a346906296840746125a0E44976454", // SimpleAccount Factory
-        entryPoint: "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789", // EP v0.6
+        signer: ethersSigner as any,
+        factoryAddress: "0x9406Cc6185a346906296840746125a0E44976454",
+        entryPoint: "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789",
       });
 
-      // 3. Create the Smart Account Client with the Paymaster
       const smartAccountClient = createSmartAccountClient({
         account: smartAccount,
         chain: base,
@@ -109,12 +104,11 @@ const PlaceOrderCard = ({
         return;
       }
 
-      const amountA = ethers.utils.parseUnits(amount, 18);
-      const amountB = ethers.utils.parseUnits((parseFloat(amount) * parseFloat(price)).toString(), 18);
+      const amountA = parseUnits(amount, 18);
+      const amountB = parseUnits((parseFloat(amount) * parseFloat(price)).toString(), 18);
       const tokenToApproveAddress = action === 'buy' ? tokenB : tokenA;
       const amountToApprove = action === 'buy' ? amountB : amountA;
 
-      // 4. Encode the `approve` and `createOrder` function calls
       const approveCallData = encodeFunctionData({
         abi: ERC20_ABI,
         functionName: "approve",
@@ -130,8 +124,7 @@ const PlaceOrderCard = ({
 
       toast({ title: "Preparing gasless transaction..." });
 
-      // 5. Send the transactions in a sponsored, atomic batch
-      const userOpHash = await smartAccountClient.sendTransactions({
+      await smartAccountClient.sendTransactions({
         transactions: [
           {
             to: tokenToApproveAddress as Hex,
@@ -148,9 +141,6 @@ const PlaceOrderCard = ({
 
       toast({ title: "Order submitted!", description: "Your gasless transaction is being processed." });
 
-      // Here you would typically wait for the UserOperation to be mined
-      // and then call onOrderPlaced() to trigger a refetch.
-
       onOrderPlaced();
       if (action === 'buy') setBuyAmount("");
       else setSellAmount("");
@@ -164,13 +154,13 @@ const PlaceOrderCard = ({
   };
 
   return (
-    <Card className="bg-crypto-card border-gray-800">
+    <Card className="bg-card border-border">
       <CardHeader className="pb-2">
         <CardTitle>Place Order</CardTitle>
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="buy" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 bg-gray-800/50">
+          <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="buy">Buy</TabsTrigger>
             <TabsTrigger value="sell">Sell</TabsTrigger>
           </TabsList>
@@ -178,17 +168,17 @@ const PlaceOrderCard = ({
           <TabsContent value="buy" className="mt-4 space-y-4">
             <div>
               <div className="flex justify-between mb-2"><label>Price (USDT)</label></div>
-              <Input value={buyPrice} onChange={(e) => setBuyPrice(e.target.value)} className="bg-gray-800/50 border-gray-700" />
+              <Input value={buyPrice} onChange={(e) => setBuyPrice(e.target.value)} className="bg-muted border-border" />
             </div>
             <div>
               <div className="flex justify-between mb-2"><label>Amount ({selectedPair.split('/')[0]})</label></div>
-              <Input value={buyAmount} onChange={(e) => setBuyAmount(e.target.value)} placeholder="0.0000" className="bg-gray-800/50 border-gray-700" />
+              <Input value={buyAmount} onChange={(e) => setBuyAmount(e.target.value)} placeholder="0.0000" className="bg-muted border-border" />
             </div>
             <div>
               <div className="flex justify-between mb-2"><label>Total (USDT)</label></div>
-              <Input value={calculateBuyTotal()} readOnly placeholder="0.00" className="bg-gray-800/50 border-gray-700" />
+              <Input value={calculateBuyTotal()} readOnly placeholder="0.00" className="bg-muted border-border" />
             </div>
-            <Button className="w-full bg-crypto-green hover:bg-crypto-green/90" onClick={() => handlePlaceOrder('buy')} disabled={isPlacingOrder}>
+            <Button className="w-full bg-accent text-accent-foreground hover:bg-accent/90" onClick={() => handlePlaceOrder('buy')} disabled={isPlacingOrder}>
               {isPlacingOrder ? "Placing Order..." : `Buy ${selectedPair.split('/')[0]}`}
             </Button>
           </TabsContent>
@@ -196,17 +186,17 @@ const PlaceOrderCard = ({
           <TabsContent value="sell" className="mt-4 space-y-4">
             <div>
               <div className="flex justify-between mb-2"><label>Price (USDT)</label></div>
-              <Input value={sellPrice} onChange={(e) => setSellPrice(e.target.value)} className="bg-gray-800/50 border-gray-700" />
+              <Input value={sellPrice} onChange={(e) => setSellPrice(e.target.value)} className="bg-muted border-border" />
             </div>
             <div>
               <div className="flex justify-between mb-2"><label>Amount ({selectedPair.split('/')[0]})</label></div>
-              <Input value={sellAmount} onChange={(e) => setSellAmount(e.target.value)} placeholder="0.0000" className="bg-gray-800/50 border-gray-700" />
+              <Input value={sellAmount} onChange={(e) => setSellAmount(e.target.value)} placeholder="0.0000" className="bg-muted border-border" />
             </div>
             <div>
               <div className="flex justify-between mb-2"><label>Total (USDT)</label></div>
-              <Input value={calculateSellTotal()} readOnly placeholder="0.00" className="bg-gray-800/50 border-gray-700" />
+              <Input value={calculateSellTotal()} readOnly placeholder="0.00" className="bg-muted border-border" />
             </div>
-            <Button className="w-full bg-crypto-red hover:bg-crypto-red/90" onClick={() => handlePlaceOrder('sell')} disabled={isPlacingOrder}>
+            <Button className="w-full bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={() => handlePlaceOrder('sell')} disabled={isPlacingOrder}>
               {isPlacingOrder ? "Placing Order..." : `Sell ${selectedPair.split('/')[0]}`}
             </Button>
           </TabsContent>

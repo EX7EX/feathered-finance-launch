@@ -1,11 +1,10 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { ethers } from "ethers";
+import { BrowserProvider } from "ethers";
 import { Button } from "@/components/ui/button";
-import { WalletIcon } from "lucide-react";
+import { WalletIcon, TrendingUpIcon, TrendingDownIcon } from "lucide-react";
 import { useCryptoData } from "@/hooks/useCryptoData";
 import { useMarketData } from "@/hooks/useMarketData";
 import WalletModal from "@/components/WalletModal";
-import { useUserAssets } from "@/hooks/use-user-assets";
 import TradingChart from "./components/TradingChart";
 import OrderBook from "./components/OrderBook";
 import RecentTrades from "./components/RecentTrades";
@@ -13,7 +12,7 @@ import PlaceOrderCard from "./components/PlaceOrderCard";
 import CoinInformation from "./components/CoinInformation";
 import OrderHistory from "./components/OrderHistory";
 import PairSelector from "./components/PairSelector";
-import { useOrderBook, OrderWithOwner } from "@/hooks/useOrderBook";
+import { useOrderBook } from "@/hooks/useOrderBook";
 
 // Define available trading pairs
 const availablePairs = [
@@ -24,7 +23,6 @@ const availablePairs = [
 ];
 
 const ExchangePage = () => {
-  // State management
   const [selectedCoin, setSelectedCoin] = useState("bitcoin");
   const [selectedPair, setSelectedPair] = useState("BTC/USDT");
   const [timeframe, setTimeframe] = useState("1D");
@@ -33,18 +31,16 @@ const ExchangePage = () => {
 
   const selectedPairData = availablePairs.find(p => p.value === selectedPair);
 
-  // Get data from hooks
   const { data: cryptoData, loading: loadingCrypto } = useCryptoData(['bitcoin', 'ethereum', 'solana', 'cardano']);
   const { chartData, loading: loadingChart } = useMarketData([selectedCoin], getTimeframeParam(timeframe));
   const { orders, refetch: refetchOrders } = useOrderBook(selectedPairData?.tokenA || "", selectedPairData?.tokenB || "");
 
-  // Get user address
   useEffect(() => {
     const getAddress = async () => {
       if (window.ethereum) {
         try {
-          const provider = new ethers.providers.Web3Provider(window.ethereum);
-          const signer = provider.getSigner();
+          const provider = new BrowserProvider(window.ethereum);
+          const signer = await provider.getSigner();
           const address = await signer.getAddress();
           setUserAddress(address);
         } catch (error) {
@@ -73,14 +69,14 @@ const ExchangePage = () => {
   
   const handlePairChange = (pair: string) => {
     setSelectedPair(pair);
-    const selectedPairData = availablePairs.find(p => p.value === pair);
-    if (selectedPairData) {
-      setSelectedCoin(selectedPairData.coinId);
+    const pairData = availablePairs.find(p => p.value === pair);
+    if (pairData) {
+      setSelectedCoin(pairData.coinId);
     }
   };
   
-  function getTimeframeParam(timeframe: string) {
-    switch (timeframe) {
+  function getTimeframeParam(tf: string) {
+    switch (tf) {
       case "1H": return "1h";
       case "4H": return "1d";
       case "1D": return "1d";
@@ -96,11 +92,11 @@ const ExchangePage = () => {
         <div className="flex justify-between items-center">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Exchange</h1>
-            <p className="text-gray-400">Trade cryptocurrencies securely with low fees.</p>
+            <p className="text-muted-foreground">Trade cryptocurrencies securely with low fees.</p>
           </div>
           <Button 
             variant="outline" 
-            className="flex items-center gap-2 border-gray-700"
+            className="flex items-center gap-2"
             onClick={() => setIsWalletModalOpen(true)}
           >
             <WalletIcon className="h-4 w-4" />
@@ -110,7 +106,7 @@ const ExchangePage = () => {
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
-            <div className="bg-crypto-card border-gray-800 rounded-lg border shadow-sm mb-4">
+            <div className="bg-card border-border rounded-lg border shadow-sm mb-4">
               <div className="flex justify-between items-center p-4 pb-2">
                 <PairSelector 
                   selectedPair={selectedPair} 
@@ -200,7 +196,7 @@ export interface Order {
 export const PriceChangeIndicator = ({ change }: { change: string }) => {
   const isNegative = change.startsWith('-');
   return (
-    <span className={`flex items-center ${isNegative ? 'text-crypto-red' : 'text-crypto-green'}`}>
+    <span className={`flex items-center ${isNegative ? 'text-destructive' : 'text-accent'}`}>
       {isNegative 
         ? <TrendingDownIcon className="h-4 w-4 mr-1" /> 
         : <TrendingUpIcon className="h-4 w-4 mr-1" />} 
@@ -208,7 +204,5 @@ export const PriceChangeIndicator = ({ change }: { change: string }) => {
     </span>
   );
 };
-
-import { TrendingUpIcon, TrendingDownIcon } from "lucide-react";
 
 export default ExchangePage;

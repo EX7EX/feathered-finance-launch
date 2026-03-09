@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { ethers } from 'ethers';
+import { Contract, parseUnits, parseEther, formatUnits } from 'ethers';
 import { useWeb3 } from './provider';
 import {
   TOKEN_FACTORY_ABI,
@@ -31,21 +31,17 @@ export const useTokenFactory = () => {
       setIsLoading(true);
       setError(null);
 
-      const factory = new ethers.Contract(
-        TOKEN_FACTORY_ADDRESS,
-        TOKEN_FACTORY_ABI,
-        signer
-      );
+      const factory = new Contract(TOKEN_FACTORY_ADDRESS, TOKEN_FACTORY_ABI, signer);
 
       const tx = await factory.createToken(
         name,
         symbol,
         decimals,
-        ethers.utils.parseUnits(totalSupply, decimals)
+        parseUnits(totalSupply, decimals)
       );
 
       const receipt = await tx.wait();
-      const event = receipt.events?.find(e => e.event === 'TokenCreated');
+      const event = receipt?.logs?.find((log: any) => log.fragment?.name === 'TokenCreated');
       return event?.args?.tokenAddress;
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create token');
@@ -82,25 +78,21 @@ export const useLaunchpad = () => {
       setIsLoading(true);
       setError(null);
 
-      const launchpad = new ethers.Contract(
-        LAUNCHPAD_ADDRESS,
-        LAUNCHPAD_ABI,
-        signer
-      );
+      const launchpad = new Contract(LAUNCHPAD_ADDRESS, LAUNCHPAD_ABI, signer);
 
       const tx = await launchpad.createSale(
         tokenAddress,
         startTime,
         endTime,
-        ethers.utils.parseEther(price),
-        ethers.utils.parseEther(minContribution),
-        ethers.utils.parseEther(maxContribution),
-        ethers.utils.parseEther(softCap),
-        ethers.utils.parseEther(hardCap)
+        parseEther(price),
+        parseEther(minContribution),
+        parseEther(maxContribution),
+        parseEther(softCap),
+        parseEther(hardCap)
       );
 
       const receipt = await tx.wait();
-      const event = receipt.events?.find(e => e.event === 'SaleCreated');
+      const event = receipt?.logs?.find((log: any) => log.fragment?.name === 'SaleCreated');
       return event?.args?.saleId;
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create sale');
@@ -125,11 +117,7 @@ export const useLaunchpad = () => {
       setIsLoading(true);
       setError(null);
 
-      const launchpad = new ethers.Contract(
-        LAUNCHPAD_ADDRESS,
-        LAUNCHPAD_ABI,
-        signer
-      );
+      const launchpad = new Contract(LAUNCHPAD_ADDRESS, LAUNCHPAD_ABI, signer);
 
       const tx = await launchpad.configureVesting(
         saleId,
@@ -171,14 +159,10 @@ export const useTokenDistribution = () => {
       setIsLoading(true);
       setError(null);
 
-      const distribution = new ethers.Contract(
-        DISTRIBUTION_ADDRESS,
-        DISTRIBUTION_ABI,
-        signer
-      );
+      const distribution = new Contract(DISTRIBUTION_ADDRESS, DISTRIBUTION_ABI, signer);
 
       const parsedAmounts = amounts.map(amount =>
-        ethers.utils.parseUnits(amount, decimals)
+        parseUnits(amount, decimals)
       );
 
       const tx = await distribution.distributeTokens(
@@ -215,14 +199,10 @@ export const useTokenDistribution = () => {
       setIsLoading(true);
       setError(null);
 
-      const distribution = new ethers.Contract(
-        DISTRIBUTION_ADDRESS,
-        DISTRIBUTION_ABI,
-        signer
-      );
+      const distribution = new Contract(DISTRIBUTION_ADDRESS, DISTRIBUTION_ABI, signer);
 
       const parsedAmounts = amounts.map(amount =>
-        ethers.utils.parseUnits(amount, decimals)
+        parseUnits(amount, decimals)
       );
 
       const tx = await distribution.distributeWithVesting(
@@ -262,7 +242,7 @@ export const useToken = (address: string) => {
       setIsLoading(true);
       setError(null);
 
-      const token = new ethers.Contract(address, ERC20_ABI, provider);
+      const token = new Contract(address, ERC20_ABI, provider);
       const [name, symbol, decimals, totalSupply] = await Promise.all([
         token.name(),
         token.symbol(),
@@ -274,7 +254,7 @@ export const useToken = (address: string) => {
         name,
         symbol,
         decimals,
-        totalSupply: ethers.utils.formatUnits(totalSupply, decimals),
+        totalSupply: formatUnits(totalSupply, decimals),
       };
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to get token info');
@@ -285,4 +265,4 @@ export const useToken = (address: string) => {
   }, [provider, address]);
 
   return { getTokenInfo, isLoading, error };
-}; 
+};
