@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { GamepadIcon, Trophy, Coins, Star, Egg, EggFried, CircleCheck } from "lucide-react";
+import { GamepadIcon, Trophy, Coins, Star, Egg, EggFried, CheckCircle2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { toast } from "@/components/ui/use-toast";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -1400,7 +1400,7 @@ const Game = () => {
                             {achievement.icon}
                             {achievement.completed && (
                               <div className="absolute -bottom-1 -right-1 bg-crypto-purple rounded-full p-[1px]">
-                                <CircleCheck className="h-3 w-3 text-white" />
+                                <CheckCircle2 className="h-3 w-3 text-white" />
                               </div>
                             )}
                           </div>
