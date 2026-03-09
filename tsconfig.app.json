@@ -33,6 +33,9 @@
   "include": [
     "src"
   ],
+  "exclude": [
+    "src/integrations/supabase/types.ts"
+  ],
   "references": [
     {
       "path": "./tsconfig.node.json"
