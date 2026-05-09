@@ -4,6 +4,7 @@ import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
 import MobileNav from "./MobileNav";
 import { useIsMobile } from "@/hooks/use-mobile";
+import TestnetBanner from "./TestnetBanner";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -14,6 +15,7 @@ const Layout = ({ children }: LayoutProps) => {
   
   return (
     <div className="min-h-screen bg-crypto-dark">
+      <TestnetBanner />
       {isMobile ? <MobileNav /> : <Navbar />}
       <div className="flex">
         {!isMobile && <Sidebar />}
