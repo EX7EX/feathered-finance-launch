@@ -1,36 +1,38 @@
-import { ethers } from 'ethers';
+import { JsonRpcProvider, Wallet, Contract } from 'ethers';
 import pino from 'pino';
 import 'dotenv/config';
 
-// Assuming the ABI is accessible. In a real monorepo, this would be imported
-// from a shared package. For this scaffold, we'll redefine it.
+// Order book ABI (matches OrderBook.sol on Base Sepolia).
 const ORDER_BOOK_ABI = [
-  "event OrderCreated(uint256 id, address owner, uint8 orderType, address tokenA, address tokenB, uint256 amountA, uint256 amountB)",
-  "event OrderCancelled(uint256 id)",
-  "event OrderFilled(uint256 id)",
-  "constructor()",
-  "function createOrder(uint8 orderType, address tokenA, address tokenB, uint256 amountA, uint256 amountB)",
-  "function getOrders(address tokenA, address tokenB) view returns (tuple(uint256 id, address owner, uint8 orderType, address tokenA, address tokenB, uint256 amountA, uint256 amountB, bool isFilled, bool isCancelled)[])",
-  "function cancelOrder(uint256 orderId)",
+  "function getOrders(address tokenA, address tokenB) view returns (tuple(uint256 id, address owner, uint8 orderType, address tokenA, address tokenB, uint256 amountA, uint256 amountB, uint256 filledAmountA, uint256 expiry, uint8 status)[])",
   "function executeTrade(uint256 buyOrderId, uint256 sellOrderId)",
   "function operator() view returns (address)",
-  "function setOperator(address newOperator)"
 ];
-const ORDER_BOOK_ADDRESS = process.env.VITE_ORDER_BOOK_ADDRESS || '0x5FbDB2315678afecb367f032d93F642f64180aa3';
 
-// --- Setup ---
-const logger = pino();
-const RPC_URL = process.env.BASE_GOERLI_RPC_URL || 'https://goerli.base.org';
+const ORDER_BOOK_ADDRESS = process.env.VITE_ORDER_BOOK_ADDRESS || process.env.ORDER_BOOK_ADDRESS;
+const RPC_URL = process.env.BASE_SEPOLIA_RPC_URL || 'https://sepolia.base.org';
 const OPERATOR_PRIVATE_KEY = process.env.OPERATOR_PRIVATE_KEY;
+const TOKEN_A = process.env.VITE_TEST_WBTC_ADDRESS;
+const TOKEN_B = process.env.VITE_TEST_USDC_ADDRESS;
+
+const logger = pino();
 
 if (!OPERATOR_PRIVATE_KEY) {
-  logger.error('OPERATOR_PRIVATE_KEY is not set in environment variables.');
+  logger.error('OPERATOR_PRIVATE_KEY is not set.');
+  process.exit(1);
+}
+if (!ORDER_BOOK_ADDRESS) {
+  logger.error('ORDER_BOOK_ADDRESS / VITE_ORDER_BOOK_ADDRESS is not set.');
+  process.exit(1);
+}
+if (!TOKEN_A || !TOKEN_B) {
+  logger.error('VITE_TEST_WBTC_ADDRESS and VITE_TEST_USDC_ADDRESS must be set.');
   process.exit(1);
 }
 
-const provider = new ethers.providers.JsonRpcProvider(RPC_URL);
-const operatorWallet = new ethers.Wallet(OPERATOR_PRIVATE_KEY, provider);
-const orderBookContract = new ethers.Contract(ORDER_BOOK_ADDRESS, ORDER_BOOK_ABI, operatorWallet);
+const provider = new JsonRpcProvider(RPC_URL);
+const operatorWallet = new Wallet(OPERATOR_PRIVATE_KEY, provider);
+const orderBookContract = new Contract(ORDER_BOOK_ADDRESS, ORDER_BOOK_ABI, operatorWallet);
 
 logger.info(`Matching engine starting. Operator address: ${operatorWallet.address}`);
 
@@ -43,15 +45,10 @@ async function matchAndSettle() {
   logger.info('--- Running matching cycle ---');
 
   try {
-    // 1. Fetch all orders for a specific pair.
-    // In a real engine, this would iterate over many pairs.
-    // We'll use the hardcoded BTC/USDT addresses from the frontend for this example.
-    const tokenA = "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599";
-    const tokenB = "0xdAC17F958D2ee523a2206206994597C13D831ec7";
+    const allOrders = await orderBookContract.getOrders(TOKEN_A, TOKEN_B);
 
-    const allOrders = await orderBookContract.getOrders(tokenA, tokenB);
-
-    const openOrders = allOrders.filter((order: any) => !order.isFilled && !order.isCancelled);
+    // status: 0 Open, 1 Filled, 2 Cancelled
+    const openOrders = allOrders.filter((order: any) => Number(order.status) === 0);
 
     if (openOrders.length === 0) {
       logger.info('No open orders to match.');
@@ -77,7 +74,7 @@ async function matchAndSettle() {
         }
 
         // Check for exact match (for this simplified engine)
-        if (buy.amountA.eq(sell.amountA) && buy.amountB.eq(sell.amountB)) {
+        if (buy.amountA === sell.amountA && buy.amountB === sell.amountB) {
           logger.info(`MATCH FOUND: Buy Order #${buy.id} and Sell Order #${sell.id}`);
 
           // Mark as processed for this cycle
