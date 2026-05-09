@@ -13,18 +13,19 @@ import CoinInformation from "./components/CoinInformation";
 import OrderHistory from "./components/OrderHistory";
 import PairSelector from "./components/PairSelector";
 import { useOrderBook } from "@/hooks/useOrderBook";
+import TestnetFaucet from "@/components/TestnetFaucet";
+import { TEST_TOKENS } from "@/integrations/web3/contracts";
 
-// Define available trading pairs
+// Trading pairs use the testnet ERC20s deployed on Base Sepolia.
+// Until the deploy script is run, addresses are empty strings; the UI will
+// surface that via the faucet card and disable trades.
 const availablePairs = [
-  { value: "BTC/USDT", label: "BTC/USDT", coinId: "bitcoin", tokenA: "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599", tokenB: "0xdAC17F958D2ee523a2206206994597C13D831ec7" },
-  { value: "ETH/USDT", label: "ETH/USDT", coinId: "ethereum", tokenA: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2", tokenB: "0xdAC17F958D2ee523a2206206994597C13D831ec7" },
-  { value: "SOL/USDT", label: "SOL/USDT", coinId: "solana", tokenA: "0x7d2768dE32b0b80b7a3454c06BdAc94A69DDc7A9", tokenB: "0xdAC17F958D2ee523a2206206994597C13D831ec7" },
-  { value: "ADA/USDT", label: "ADA/USDT", coinId: "cardano", tokenA: "0x9A642d6b33688DEF1325A541dA64C321b1615416", tokenB: "0xdAC17F958D2ee523a2206206994597C13D831ec7" }
+  { value: "tWBTC/tUSDC", label: "tWBTC/tUSDC", coinId: "bitcoin", tokenA: TEST_TOKENS.tWBTC, tokenB: TEST_TOKENS.tUSDC },
 ];
 
 const ExchangePage = () => {
   const [selectedCoin, setSelectedCoin] = useState("bitcoin");
-  const [selectedPair, setSelectedPair] = useState("BTC/USDT");
+  const [selectedPair, setSelectedPair] = useState("tWBTC/tUSDC");
   const [timeframe, setTimeframe] = useState("1D");
   const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
   const [userAddress, setUserAddress] = useState<string | null>(null);
@@ -159,6 +160,8 @@ const ExchangePage = () => {
             />
             
             <OrderHistory orderHistory={userOrders} onCancelOrder={refetchOrders} />
+
+            <TestnetFaucet />
           </div>
         </div>
       </div>
