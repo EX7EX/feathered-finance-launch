@@ -88,10 +88,15 @@ const PlaceOrderCard = ({
       const orderBook = new Contract(ORDER_BOOK_ADDRESS, ORDER_BOOK_ABI, signer);
       const orderTypeEnum = action === 'buy' ? 0 : 1;
       toast({ title: "Placing order..." });
-      const orderTx = await orderBook.createOrder(orderTypeEnum, tokenA, tokenB, amountA, amountB);
-      await orderTx.wait();
+      const orderTx = await orderBook.createOrder(orderTypeEnum, tokenA, tokenB, amountA, amountB, 0);
+      const receipt = await orderTx.wait();
 
-      toast({ title: "Order placed successfully!" });
+      toast({
+        title: "Order placed",
+        description: `View on Basescan ↗`,
+        action: undefined,
+      });
+      console.info(`Order tx: https://sepolia.basescan.org/tx/${receipt?.hash ?? orderTx.hash}`);
       onOrderPlaced();
       if (action === 'buy') setBuyAmount("");
       else setSellAmount("");
