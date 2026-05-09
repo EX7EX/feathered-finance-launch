@@ -12,8 +12,9 @@ interface ContractOrder {
   tokenB: string;
   amountA: bigint;
   amountB: bigint;
-  isFilled: boolean;
-  isCancelled: boolean;
+  filledAmountA: bigint;
+  expiry: bigint;
+  status: number; // 0 Open, 1 Filled, 2 Cancelled
 }
 
 // Add owner to the Order type
@@ -66,7 +67,7 @@ export const useOrderBook = (tokenA: string, tokenB: string) => {
               amount: formattedAmountA,
               total: formattedAmountB,
               date: new Date(),
-              status: order.isFilled ? 'filled' : order.isCancelled ? 'canceled' : 'open',
+              status: order.status === 1 ? 'filled' : order.status === 2 ? 'canceled' : 'open',
               pair: `${tokenA}/${tokenB}`,
             }
         });
